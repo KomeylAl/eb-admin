@@ -1,0 +1,14 @@
+services:
+  psy-panel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ebraz-psy-panel
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      BACKEND_API_URL: ${BACKEND_API_URL:-https://api.ebrazclinic.ir/}
+      NODE_ENV: production
+      PORT: 3001
+      HOSTNAME: 0.0.0.0
+    restart: unless-stopped
