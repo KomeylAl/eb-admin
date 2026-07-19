@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   convertNotifPriority,
   convertNotifStatus,
@@ -163,9 +164,46 @@ export const unreadNotificationColumns = (
   },
 ];
 
+const doctorAvatarSrc = (row: any): string | null =>
+  row.avatar_url ??
+  row.doctor_profile?.avatar_url ??
+  (typeof row.avatar === "string" && row.avatar.startsWith("http")
+    ? row.avatar
+    : null);
+
 export const doctorColumns = [
-  { header: "نام", accessor: "name" },
-  { header: "تلفن", accessor: "phone" },
+  {
+    header: "",
+    accessor: (row: any) => {
+      const src = doctorAvatarSrc(row);
+      return src ? (
+        // unoptimized: Laravel storage URLs fail via /_next/image optimizer (400)
+        <Image
+          src={src}
+          alt={row.name ?? "متخصص"}
+          width={40}
+          height={40}
+          unoptimized
+          className="size-10 rounded-full object-cover ring-1 ring-border shrink-0"
+        />
+      ) : (
+        <div className="size-10 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-300 flex items-center justify-center font-semibold shrink-0">
+          {(row.name ?? "؟").trim().charAt(0)}
+        </div>
+      );
+    },
+  },
+  {
+    header: "نام",
+    accessor: (row: any) => (
+      <div className="flex flex-col">
+        <span className="font-medium">{row.name}</span>
+        <span className="text-xs text-muted-foreground mt-0.5" dir="ltr">
+          {row.phone}
+        </span>
+      </div>
+    ),
+  },
   { header: "تاریخ تولد", accessor: (row: any) => dateConvert(row.birth_date) },
   {
     header: "پنل متخصص",

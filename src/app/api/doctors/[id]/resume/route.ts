@@ -1,9 +1,30 @@
 import { adaptBackendResponse } from "@/lib/backend";
 import { NextRequest, NextResponse } from "next/server";
 
+const emptyResume = {
+  id: null,
+  doctor_id: null,
+  title: "",
+  bio: "",
+  specialization: "",
+  educations: [],
+  experiences: [],
+  skills: [],
+  certifications: [],
+  social_links: {
+    linkedin: "",
+    instagram: "",
+    website: "",
+    twitter: "",
+  },
+  content: "",
+  file_path: null,
+  file_url: null,
+};
+
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
 
@@ -18,17 +39,58 @@ export async function GET(
         },
       }
     );
+
+    const payload = await response.json().catch(() => null);
+
     if (!response.ok) {
-      const data = adaptBackendResponse(await response.json());
-      return NextResponse.json(data, { status: response.status });
+      if (response.status === 404) {
+        return NextResponse.json(
+          {
+            message: payload?.message ?? "Resume not found.",
+            ...emptyResume,
+          },
+          { status: 200 }
+        );
+      }
+
+      return NextResponse.json(
+        {
+          message: payload?.message || "Error getting resume",
+          errors: payload?.errors ?? null,
+        },
+        { status: response.status }
+      );
     }
 
-    const data = adaptBackendResponse(await response.json());
-    return NextResponse.json(data, { status: 200 });
-  } catch (error: any) {
-    console.log(error);
+    if (payload?.data == null) {
+      return NextResponse.json(
+        {
+          message: payload?.message ?? "Resume not found.",
+          ...emptyResume,
+        },
+        { status: 200 }
+      );
+    }
+
+    const adapted = adaptBackendResponse(payload);
+    const resume =
+      adapted?.data &&
+      typeof adapted.data === "object" &&
+      !Array.isArray(adapted.data)
+        ? adapted.data
+        : adapted;
+
     return NextResponse.json(
-      { message: `Something went wrong: ${error.message}` },
+      {
+        message: adapted?.message ?? "Success",
+        ...resume,
+      },
+      { status: 200 }
+    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json(
+      { message: `Something went wrong: ${message}` },
       { status: 500 }
     );
   }
@@ -36,14 +98,13 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
 
   try {
     const token = req.cookies.get("token");
     const formData = await req.formData();
-    // console.log(formData);
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_API_URL}api/v1/doctors/${id}/resume`,
       {
@@ -55,23 +116,30 @@ export async function POST(
         body: formData,
       }
     );
-    if (!response.ok) {
-      const data = await response.json();
-      console.log(data);
-      return NextResponse.json(data, { status: response.status });
-    }
-    
-    const data = await response.json();
 
-    console.log(data)
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          message: payload?.message || "Error saving resume",
+          errors: payload?.errors ?? null,
+        },
+        { status: response.status }
+      );
+    }
 
     return NextResponse.json(
-      { message: "Resume saved successfuly" },
+      {
+        message: payload?.message ?? "Resume saved successfully.",
+        ...(payload?.data ?? {}),
+      },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { message: `Something went wrong: ${error.message}` },
+      { message: `Something went wrong: ${message}` },
       { status: 500 }
     );
   }

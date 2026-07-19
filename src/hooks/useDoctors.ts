@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 export function useDoctors(
@@ -36,45 +36,66 @@ export function useGetDoctor(doctorId: string) {
 
 export function useGetDoctorResume(doctorId: string) {
   return useQuery({
-    queryKey: ["doctor", doctorId],
+    queryKey: ["doctor-resume", doctorId],
     queryFn: async () => {
       const res = await fetch(`/api/doctors/${doctorId}/resume`);
-      if (res.status !== 200) {
-        throw new Error("خطا در دریافت اطلاعات");
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(payload?.message || "خطا در دریافت اطلاعات");
       }
-      return res.json();
+
+      return payload;
     },
   });
 }
 
-export function useSaveDoctorResume(onDuccess: () => void) {
+export function useSaveDoctorResume(onSuccess: () => void) {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({
       formData,
       doctorId,
     }: {
-      formData: any;
+      formData: Record<string, unknown>;
       doctorId: string;
     }) => {
       const newData = new FormData();
-      newData.append("title", formData.title);
-      newData.append("bio", formData.bio);
-      newData.append("specialization", formData.specialization);
-      newData.append("educations", JSON.stringify(formData.educations));
-      newData.append("experiences", JSON.stringify(formData.experiences));
-      newData.append("skills", JSON.stringify(formData.skills));
-      newData.append("certifications", formData.certifications);
-      newData.append("social_links", JSON.stringify(formData.social_links));
+      newData.append("title", String(formData.title ?? ""));
+      newData.append("bio", String(formData.bio ?? ""));
+      newData.append("content", String(formData.content ?? ""));
+      newData.append("specialization", String(formData.specialization ?? ""));
+      newData.append(
+        "educations",
+        JSON.stringify(formData.educations ?? [])
+      );
+      newData.append(
+        "experiences",
+        JSON.stringify(formData.experiences ?? [])
+      );
+      newData.append("skills", JSON.stringify(formData.skills ?? []));
+      newData.append(
+        "certifications",
+        JSON.stringify(formData.certifications ?? [])
+      );
+      newData.append(
+        "social_links",
+        JSON.stringify(formData.social_links ?? {})
+      );
 
-      if (formData.file && formData.file.length > 0) {
-        newData.append("file", formData.file[0]);
+      const fileValue = formData.file;
+      if (fileValue instanceof FileList && fileValue.length > 0) {
+        newData.append("file", fileValue[0]);
+      } else if (fileValue instanceof File) {
+        newData.append("file", fileValue);
       }
 
       const res = await fetch(`/api/doctors/${doctorId}/resume`, {
         method: "POST",
         body: newData,
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => null);
 
       if (!res.ok) {
         throw new Error(json?.message || "خطا در ذخیره رزومه");
@@ -83,12 +104,14 @@ export function useSaveDoctorResume(onDuccess: () => void) {
       return json;
     },
     onError(error) {
-      console.log(error);
-      toast.error("خطا در ذخیره رزومه");
+      toast.error(error.message || "خطا در ذخیره رزومه");
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       toast.success("رزومه با موفقیت ذخیره شد");
-      onDuccess();
+      queryClient.invalidateQueries({
+        queryKey: ["doctor-resume", variables.doctorId],
+      });
+      onSuccess();
     },
   });
 }

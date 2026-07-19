@@ -7,12 +7,21 @@ import {
 } from "@/hooks/useDoctors";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React from "react";
+import Image from "next/image";
 import Header from "@/components/layout/Header";
 import WithRole from "@/app/admin-dashboard/_components/WithRole";
 import DoctorSevenDays from "@/app/admin-dashboard/_components/tabs/DoctorSevenDays";
 import DoctorThirtyDays from "@/app/admin-dashboard/_components/tabs/DoctorThirtyDays";
 import DoctorInfo from "@/app/admin-dashboard/_components/tabs/DoctorInfo";
 import DoctorResumeTab from "@/app/admin-dashboard/_components/tabs/DoctorResumeTab";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CalendarClock, CalendarDays, ChevronDown, MessageSquareText } from "lucide-react";
 
 interface Params {
   doctorId: string;
@@ -30,39 +39,73 @@ const DoctorPanel = ({ params }: PageProps) => {
     useSendTomorrowSms(doctorId);
 
   const { data } = useGetDoctor(doctorId);
+  const doctor = data?.data ?? null;
+  const avatarSrc =
+    doctor?.avatar_url ??
+    doctor?.doctor_profile?.avatar_url ??
+    (typeof doctor?.avatar === "string" && doctor.avatar.startsWith("http")
+      ? doctor.avatar
+      : null);
+
+  const smsSending = todaySmsLoading || tomorrowSmsLoading;
 
   return (
     <div className="w-full h-full flex flex-col">
       <Header searchFn={() => {}} isShowSearch={false} />
       <WithRole allowedRoles={["boss", "manager"]}>
-        <div className="w-full p-12">
+        <div className="w-full p-6 md:p-12">
           <div className="w-full h-full space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-bold text-2xl">پنل متخصص</h2>
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => sendTodaySms()}
-                  className={`px-12 py-2 rounded-md text-white text-center cursor-pointer ${
-                    todaySmsLoading ? "bg-blue-400" : "bg-blue-600"
-                  }`}
-                >
-                  {todaySmsLoading
-                    ? "در حال ارسال..."
-                    : "ارسال پیامک نوبت های امروز"}
-                </button>
-                <button
-                  onClick={() => sendTomorrowSms()}
-                  className={`px-12 py-2 rounded-md text-white text-center cursor-pointer ${
-                    tomorrowSmsLoading ? "bg-blue-400" : "bg-blue-600"
-                  }`}
-                >
-                  {tomorrowSmsLoading
-                    ? "در حال ارسال..."
-                    : "ارسال پیامک نوبت های فردا"}
-                </button>
+                {avatarSrc ? (
+                  // unoptimized: Laravel storage URLs fail via /_next/image optimizer (400)
+                  <Image
+                    src={avatarSrc}
+                    alt={doctor?.name ?? "متخصص"}
+                    width={48}
+                    height={48}
+                    unoptimized
+                    className="size-12 rounded-full object-cover ring-1 ring-border"
+                  />
+                ) : (
+                  <div className="size-12 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-300 flex items-center justify-center font-bold text-lg">
+                    {(doctor?.name ?? "؟").trim().charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <h2 className="font-bold text-xl md:text-2xl">
+                    {doctor?.name ?? "پنل متخصص"}
+                  </h2>
+                  {doctor?.phone && (
+                    <p className="text-sm text-muted-foreground">
+                      {doctor.phone}
+                    </p>
+                  )}
+                </div>
               </div>
+
+              <DropdownMenu dir="rtl">
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" disabled={smsSending}>
+                    <MessageSquareText />
+                    {smsSending ? "در حال ارسال..." : "ارسال پیامک نوبت‌ها"}
+                    <ChevronDown className="opacity-60" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => sendTodaySms()}>
+                    <CalendarClock />
+                    نوبت‌های امروز
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => sendTomorrowSms()}>
+                    <CalendarDays />
+                    نوبت‌های فردا
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            <div className="mt-12 flex-1">
+
+            <div className="mt-8 flex-1">
               <Tabs defaultValue="sevenDays" className="w-full overflow-x-auto">
                 <TabsList className="gap-4">
                   <TabsTrigger value="sevenDays">
@@ -81,7 +124,7 @@ const DoctorPanel = ({ params }: PageProps) => {
                   <DoctorThirtyDays doctorId={doctorId} />
                 </TabsContent>
                 <TabsContent value="info" className="w-full">
-                  <DoctorInfo doctor={{}} doctorId={doctorId} />
+                  <DoctorInfo doctorId={doctorId} />
                 </TabsContent>
                 <TabsContent value="resume" className="w-full">
                   <DoctorResumeTab doctorId={doctorId} />

@@ -21,12 +21,15 @@ interface UpdateDoctorFormProps {
   doctor: any;
   onDoctorEditted: () => void;
   onCloseModal: () => void;
+  /** Render inside a page/tab: hides the back button and modal title. */
+  embedded?: boolean;
 }
 
 const UpdateDoctorForm = ({
   doctor,
   onDoctorEditted,
   onCloseModal,
+  embedded = false,
 }: UpdateDoctorFormProps) => {
   const { mutate: updateDoctor, isPending } = useEditDoctor(
     doctor.id,
@@ -76,7 +79,7 @@ const UpdateDoctorForm = ({
       medical_number: doctor.medical_number ?? profile.medical_number,
       birth_date: doctor.birth_date,
       email: doctor.email,
-      days: doctor.days ?? profile.days,
+      days: doctor.days ?? null,
       department_ids: (doctor.departments ?? []).map((item: any) =>
         item.id.toString()
       ),
@@ -106,7 +109,9 @@ const UpdateDoctorForm = ({
       onSubmit={handleSubmit(onSubmit)}
       className="w-full h-full p-8 space-y-7"
     >
-      <h2 className="text-xl font-semibold">ویرایش متخصص</h2>
+      <h2 className="text-xl font-semibold">
+        {embedded ? "ویرایش اطلاعات متخصص" : "ویرایش متخصص"}
+      </h2>
 
       <div className="w-full flex items-center gap-4">
         <div className="w-full">
@@ -267,36 +272,14 @@ const UpdateDoctorForm = ({
               />
             </div>
           )}        </div>
-        <div className="w-full">
-          <label>رزومه</label>
-          <Input
-            type="file"
-            accept="pdf/*"
-            {...register("resume")}
-            className="w-full bg-white py-2 rounded-md  px-2 mt-2"
-          />
-          {errors.resume && (
-            <p className="text-red-500 text-sm">{errors.resume.message}</p>
-          )}
-          <div className="mt-3">
-            {doctor.resume ? (
-              <iframe
-                src={doctor.resume}
-                width="100%"
-                height="300px"
-                className="border rounded-lg"
-              />
-            ) : (
-              <p>رزومه بارگذاری نشده است.</p>
-            )}
-          </div>
-        </div>
       </div>
 
       <div className="flex justify-end gap-3 mt-5">
-        <Button variant="outline" onClick={onCloseModal} type="button">
-          بازگشت
-        </Button>
+        {!embedded && (
+          <Button variant="outline" onClick={onCloseModal} type="button">
+            بازگشت
+          </Button>
+        )}
         <Button
           type="submit"
           className={`${isPending ? "bg-blue-400" : "bg-blue-600"}`}
