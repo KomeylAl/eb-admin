@@ -4,10 +4,10 @@ import { appointmentType } from "../../types/appointmentTypes";
 
 export function useAppointmentsByDate(date: string = "") {
   return useQuery({
-    queryKey: ["appointmentsByDate"],
+    queryKey: ["appointmentsByDate", date],
     queryFn: async () => {
       const res = await fetch(`/api/appointments?date=${date}`);
-      if (res.status !== 200) {
+      if (!res.ok) {
         toast.error("خطا در دریافت اطلاعات");
       }
       return res.json();
@@ -15,21 +15,65 @@ export function useAppointmentsByDate(date: string = "") {
   });
 }
 
-export function useAppointments(
-  page: number = 0,
-  pageSize: number = 10,
-  search: string = "",
-  date: string = "",
-  clientId: string = ""
-) {
+export type AppointmentFilters = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  date?: string;
+  clientId?: string;
+  doctorId?: string;
+  status?: string;
+  paymentStatus?: string;
+  fromDate?: string;
+  toDate?: string;
+};
+
+export function useAppointments(filters: AppointmentFilters | number = 1, pageSizeArg = 10, searchArg = "", dateArg = "", clientIdArg = "") {
+  // Support both object API and legacy positional args used by admin pages
+  const isLegacy = typeof filters === "number";
+  const page = isLegacy ? filters : (filters.page ?? 1);
+  const pageSize = isLegacy ? pageSizeArg : (filters.pageSize ?? 10);
+  const search = isLegacy ? searchArg : (filters.search ?? "");
+  const date = isLegacy ? dateArg : (filters.date ?? "");
+  const clientId = isLegacy ? clientIdArg : (filters.clientId ?? "");
+  const doctorId = isLegacy ? "" : (filters.doctorId ?? "");
+  const status = isLegacy ? "" : (filters.status ?? "");
+  const paymentStatus = isLegacy ? "" : (filters.paymentStatus ?? "");
+  const fromDate = isLegacy ? "" : (filters.fromDate ?? "");
+  const toDate = isLegacy ? "" : (filters.toDate ?? "");
+
   return useQuery({
-    queryKey: ["appointments", page, pageSize, search, date, clientId],
+    queryKey: [
+      "appointments",
+      page,
+      pageSize,
+      search,
+      date,
+      clientId,
+      doctorId,
+      status,
+      paymentStatus,
+      fromDate,
+      toDate,
+    ],
     queryFn: async () => {
-      const res = await fetch(
-        `/api/appointments?page=${page}&size=${pageSize}&search=${search}&date=${date}&clientId=${clientId}`
-      );
-      if (res.status !== 200) {
+      const qs = new URLSearchParams({
+        page: String(page),
+        size: String(pageSize),
+      });
+      if (search) qs.set("search", search);
+      if (date) qs.set("date", date);
+      if (clientId) qs.set("clientId", clientId);
+      if (doctorId) qs.set("doctorId", doctorId);
+      if (status) qs.set("status", status);
+      if (paymentStatus) qs.set("paymentStatus", paymentStatus);
+      if (fromDate) qs.set("fromDate", fromDate);
+      if (toDate) qs.set("toDate", toDate);
+
+      const res = await fetch(`/api/appointments?${qs}`);
+      if (!res.ok) {
         toast.error("خطا در دریافت اطلاعات");
+        throw new Error("Failed to fetch appointments");
       }
       return res.json();
     },
@@ -62,11 +106,14 @@ export function useAddAppointment(onAddedAppointment: () => void) {
     mutationFn: async (data: any) => {
       const res = await fetch(`/api/appointments/`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      const json = await res.json().catch(() => null);
       if (!res.ok) {
-        throw new Error("مشکلی در افزودن نوبت پیش آمده!");
+        throw new Error(json?.message || "مشکلی در افزودن نوبت پیش آمده!");
       }
+      return json;
     },
     onError(error) {
       toast.error(error.message);
@@ -89,11 +136,14 @@ export function useUpdateAppointment(onUpdateedAppointment: () => void) {
     }) => {
       const res = await fetch(`/api/appointments/${appId}`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      const json = await res.json().catch(() => null);
       if (!res.ok) {
-        throw new Error("مشکلی در ویرایش نوبت پیش آمده!");
+        throw new Error(json?.message || "مشکلی در ویرایش نوبت پیش آمده!");
       }
+      return json;
     },
     onError(error) {
       toast.error(error.message);

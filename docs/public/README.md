@@ -25,7 +25,7 @@
 
 ## احراز هویت
 
-### ورود با رمز
+### ورود
 
 ```http
 POST /auth/login
@@ -99,48 +99,6 @@ Content-Type: application/json
 
 ---
 
-### ورود با کد یک‌بارمصرف (OTP)
-
-این روش فقط برای کاربران با نوع `admin` و `doctor` فعال است.
-
-#### درخواست کد
-
-```http
-POST /auth/otp/request
-Content-Type: application/json
-```
-
-```json
-{
-  "phone": "09131889355",
-  "type": "admin"
-}
-```
-
-#### تأیید کد و ورود
-
-```http
-POST /auth/otp/verify
-Content-Type: application/json
-```
-
-```json
-{
-  "phone": "09131889355",
-  "type": "admin",
-  "code": "123456"
-}
-```
-
-**پاسخ `200`:** همان پاسخ ورود با رمز، شامل `token` و `user`.
-
-- کد ۶ رقمی است و ۵ دقیقه اعتبار دارد.
-- ارسال مجدد کد پس از ۶۰ ثانیه مجاز است.
-- `type` باید `admin` یا `doctor` باشد.
-- خطای اعتبارسنجی یا کد نامعتبر با وضعیت `422` برگردانده می‌شود.
-
----
-
 ### پروفایل جاری
 
 ```http
@@ -149,42 +107,6 @@ Authorization: Bearer {token}
 ```
 
 **پاسخ `200`:** همان ساختار `user` در پاسخ login، داخل `data`.
-
----
-
-### تغییر رمز عبور با OTP
-
-این endpointها فقط برای کاربر واردشده با نوع `admin` یا `doctor` در دسترس‌اند.
-
-#### درخواست کد تغییر رمز
-
-```http
-POST /auth/password/otp
-Authorization: Bearer {token}
-Accept: application/json
-```
-
-بدنه‌ای ارسال نمی‌شود.
-
-#### ثبت رمز جدید
-
-```http
-POST /auth/password
-Authorization: Bearer {token}
-Content-Type: application/json
-```
-
-```json
-{
-  "code": "123456",
-  "password": "new-password",
-  "password_confirmation": "new-password"
-}
-```
-
-- رمز جدید حداقل ۸ کاراکتر است.
-- `password_confirmation` باید با `password` یکسان باشد.
-- کد ۵ دقیقه اعتبار دارد و فاصله درخواست مجدد ۶۰ ثانیه است.
 
 ---
 
@@ -400,6 +322,10 @@ GET /doctors/{doctor}
   "updated_at": "..."
 }
 ```
+
+> برای نمایش عمومی کافی است `GET /doctors/{doctor}` را بگیرید و آرایه `doctor_resources` را رندر کنید.
+> اگر `type === "link"` از فیلد `link` استفاده کنید؛ اگر `type === "file"` از `file_url` برای دانلود/باز کردن فایل استفاده کنید.
+> مدیریت (ایجاد/ویرایش/حذف) فقط از پنل پزشک یا ادمین انجام می‌شود؛ endpoint عمومی فقط خواندنی است.
 
 ---
 

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   AreaChart,
   Area,
@@ -7,19 +9,30 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { formatMoney } from "@/lib/utils";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function RevenueChart({
   data,
   isLoading,
+  title = "روند درآمد",
 }: {
-  data: any[];
+  data: { name: string; revenue: number }[];
   isLoading: boolean;
+  title?: string;
 }) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const axisColor = isDark ? "#94a3b8" : "#94a3b8";
+  const gridColor = isDark ? "#1e293b" : "#f1f5f9";
+
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-100 p-6">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
         <div className="h-[300px] flex items-center justify-center">
-          <div className="animate-pulse text-slate-400">Loading chart...</div>
+          <div className="animate-pulse text-slate-400 dark:text-slate-500">
+            در حال بارگذاری…
+          </div>
         </div>
       </div>
     );
@@ -30,16 +43,18 @@ export default function RevenueChart({
     payload,
     label,
   }: {
-    active: boolean;
-    payload: any[];
-    label: string;
+    active?: boolean;
+    payload?: { value: number }[];
+    label?: string;
   }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 rounded-xl shadow-lg border border-slate-100">
-          <p className="text-sm font-medium text-slate-900">{label}</p>
-          <p className="text-sm text-emerald-600 font-semibold">
-            ${payload[0].value.toLocaleString()}
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 text-right">
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-1">
+            {label}
+          </p>
+          <p className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold">
+            {formatMoney(payload[0].value)}
           </p>
         </div>
       );
@@ -48,9 +63,9 @@ export default function RevenueChart({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6">
-      <h3 className="text-lg font-semibold text-slate-900 mb-6">
-        Revenue Overview
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-6">
+        {title}
       </h3>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
@@ -60,30 +75,27 @@ export default function RevenueChart({
           >
             <defs>
               <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
             <XAxis
               dataKey="name"
-              stroke="#94a3b8"
+              stroke={axisColor}
               fontSize={12}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
-              stroke="#94a3b8"
+              stroke={axisColor}
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              tickFormatter={(value) => formatMoney(value)}
+              width={70}
             />
-            <Tooltip
-              content={
-                <CustomTooltip active={isLoading} payload={data} label={""} />
-              }
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
               dataKey="revenue"

@@ -42,8 +42,6 @@ Accept: application/json
 
 ## ورود
 
-### ورود با رمز
-
 ```http
 POST /auth/login
 Content-Type: application/json
@@ -58,54 +56,6 @@ Content-Type: application/json
 ```
 
 **پاسخ `200`:** توکن + اطلاعات کاربر شامل `doctor_profile`.
-
-### ورود با کد یک‌بارمصرف
-
-```http
-POST /auth/otp/request
-Content-Type: application/json
-```
-
-```json
-{ "phone": "09131889355", "type": "doctor" }
-```
-
-```http
-POST /auth/otp/verify
-Content-Type: application/json
-```
-
-```json
-{ "phone": "09131889355", "type": "doctor", "code": "123456" }
-```
-
-پاسخ verify مانند ورود با رمز شامل توکن و اطلاعات پزشک است. کد ۵ دقیقه
-اعتبار دارد و ارسال مجدد پس از ۶۰ ثانیه مجاز است.
-
-### تغییر رمز پزشک واردشده
-
-ابتدا کد تغییر رمز درخواست می‌شود:
-
-```http
-POST /auth/password/otp
-Authorization: Bearer {token}
-```
-
-سپس کد و رمز جدید ارسال می‌شود:
-
-```http
-POST /auth/password
-Authorization: Bearer {token}
-Content-Type: application/json
-```
-
-```json
-{
-  "code": "123456",
-  "password": "new-password",
-  "password_confirmation": "new-password"
-}
-```
 
 جزئیات کامل در [راهنمای عمومی](../public/README.md#احراز-هویت).
 
@@ -272,6 +222,8 @@ Content-Type: multipart/form-data
 
 ## منابع
 
+پزشک می‌تواند منابع پیشنهادی خود (لینک یا فایل) را از پنل خودش مدیریت کند. همین منابع در سایت اصلی داخل جزئیات پزشک برای عموم نمایش داده می‌شوند.
+
 ### فهرست منابع پزشک
 
 ```http
@@ -285,7 +237,7 @@ Authorization: Bearer {token}
 |---------|---------|--------|
 | `search` | — | `title`, `description` |
 | `type` | — | `link` یا `file` |
-| `sort_by` | `created_at` | — |
+| `sort_by` | `created_at` | `created_at`, `updated_at`, `title`, `type` |
 | `sort_direction` | `desc` | — |
 | `per_page` | `10` | ۱ تا ۱۰۰ |
 | `page` | `1` | — |
@@ -307,7 +259,49 @@ Authorization: Bearer {token}
 }
 ```
 
-> پزشک فقط **مشاهده** منابع دارد. ایجاد/ویرایش/حذف منابع فقط از پنل ادمین (`/doctors/{doctor}/resources`) انجام می‌شود.
+### ایجاد منبع
+
+```http
+POST /doctor/resources
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+```
+
+| فیلد | الزامی | توضیح |
+|------|--------|--------|
+| `title` | بله | حداکثر ۲۵۵ |
+| `type` | بله | `link` یا `file` |
+| `description` | خیر | — |
+| `link` | برای `type=link` | URL، حداکثر ۲۵۵ (برای `file` ممنوع) |
+| `file` | برای `type=file` | حداکثر ۱۰ MB (برای `link` ممنوع) |
+
+**پاسخ `201`:** `DoctorResourceItemResource`
+
+### ویرایش منبع
+
+```http
+PUT /doctor/resources/{doctorResource}
+PATCH /doctor/resources/{doctorResource}
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+```
+
+همان فیلدهای ایجاد؛ همه اختیاری‌اند. هنگام تغییر `type` به `link` باید لینک داشته باشید (جدید یا قبلی). هنگام تغییر به `file` باید فایل داشته باشید (جدید یا قبلی).
+
+منبع باید متعلق به پزشک واردشده باشد؛ در غیر این صورت `404`.
+
+**پاسخ `200`:** `DoctorResourceItemResource`
+
+### حذف منبع
+
+```http
+DELETE /doctor/resources/{doctorResource}
+Authorization: Bearer {token}
+```
+
+**پاسخ `204`**
+
+> ادمین نیز می‌تواند همین عملیات را از مسیر `/doctors/{doctor}/resources` انجام دهد.
 
 ---
 
@@ -407,7 +401,7 @@ Authorization: Bearer {token}
 | ایجاد/ویرایش نوبت | ❌ (ادمین) |
 | مشاهده/ویرایش رزومه خود | ✅ |
 | مشاهده منابع خود | ✅ |
-| ایجاد/ویرایش منابع | ❌ (ادمین) |
+| ایجاد/ویرایش/حذف منابع | ✅ |
 | مشاهده ارزیابی‌های خود | ✅ |
 | ثبت ارزیابی | ✅ (endpoint عمومی) |
 | حذف ارزیابی | ❌ (ادمین) |

@@ -133,3 +133,89 @@ export function convertNotifType(type: string) {
   }
   return output;
 }
+
+export function formatMoney(value: number | string | null | undefined): string {
+  const num = typeof value === "string" ? Number(value) : value ?? 0;
+  if (Number.isNaN(num)) return "۰";
+  return Number(num).toLocaleString("fa-IR");
+}
+
+export function paymentStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    pending: "در انتظار",
+    paid: "پرداخت‌شده",
+    unpaid: "پرداخت‌نشده",
+    partial: "پرداخت جزئی",
+    refunded: "استردادشده",
+  };
+  return map[status] ?? status;
+}
+
+export function paymentMethodLabel(method: string | null | undefined): string {
+  if (!method) return "—";
+  const map: Record<string, string> = {
+    cash: "نقد",
+    card: "کارت",
+    transfer: "انتقال",
+    other: "سایر",
+  };
+  return map[method] ?? method;
+}
+
+export function invoiceStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    draft: "پیش‌نویس",
+    issued: "صادرشده",
+    paid: "پرداخت‌شده",
+    cancelled: "لغوشده",
+  };
+  return map[status] ?? status;
+}
+
+export function adjustmentTypeLabel(type: string): string {
+  const map: Record<string, string> = {
+    discount: "تخفیف",
+    credit: "بستانکار",
+    debit: "بدهکار",
+  };
+  return map[type] ?? type;
+}
+
+export function adjustmentStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    active: "فعال",
+    void: "باطل",
+  };
+  return map[status] ?? status;
+}
+
+/** YYYY-MM-DD for API query params */
+export function toApiDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+export function downloadCsv(
+  filename: string,
+  headers: string[],
+  rows: (string | number)[][]
+) {
+  const escape = (cell: string | number) => {
+    const s = String(cell ?? "");
+    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
+  };
+  const bom = "\uFEFF";
+  const content = [headers.map(escape).join(","), ...rows.map((r) => r.map(escape).join(","))].join(
+    "\n"
+  );
+  const blob = new Blob([bom + content], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}

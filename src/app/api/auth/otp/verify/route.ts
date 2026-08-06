@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { applyAuthCookies, roleFromUser } from "@/lib/authSession";
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const token = payload?.data?.token ?? payload?.token;
     const user = payload?.data?.user ?? payload?.user;
-    const adminRole = user?.admin_role ?? user?.role;
+    const adminRole = roleFromUser(user);
 
     if (!token || !user) {
       return NextResponse.json(
@@ -49,24 +50,7 @@ export async function POST(req: NextRequest) {
       token_type: payload?.data?.token_type ?? payload?.token_type ?? "Bearer",
     });
 
-    result.cookies.set("token", token, {
-      httpOnly: true,
-      path: "/",
-      maxAge: 86400,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
-    if (adminRole) {
-      result.cookies.set("role", adminRole, {
-        httpOnly: true,
-        path: "/",
-        maxAge: 86400,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-      });
-    }
-
-    return result;
+    return applyAuthCookies(result, token, adminRole);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(

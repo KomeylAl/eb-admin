@@ -12,49 +12,12 @@ Accept: application/json
 
 و `user.type === "admin"`.
 
-**ورود با رمز:**
+**ورود:**
 
 ```json
 POST /auth/login
 { "phone": "...", "password": "...", "type": "admin" }
 ```
-
-**ورود با کد:**
-
-```json
-POST /auth/otp/request
-{ "phone": "09131889355", "type": "admin" }
-
-POST /auth/otp/verify
-{ "phone": "09131889355", "type": "admin", "code": "123456" }
-```
-
-پاسخ verify مانند login شامل `token` و اطلاعات `user` است. کد ۵ دقیقه
-اعتبار دارد و ارسال مجدد پس از ۶۰ ثانیه ممکن است.
-
-**تغییر رمز کاربر جاری:**
-
-```http
-POST /auth/password/otp
-Authorization: Bearer {token}
-```
-
-```http
-POST /auth/password
-Authorization: Bearer {token}
-Content-Type: application/json
-```
-
-```json
-{
-  "code": "123456",
-  "password": "new-password",
-  "password_confirmation": "new-password"
-}
-```
-
-> این فرایند با «تنظیم رمز عبور پزشک توسط ادمین» در
-> `POST /doctors/{doctor}/password` متفاوت است.
 
 ---
 
@@ -71,6 +34,7 @@ Content-Type: application/json
 - [ارزیابی‌های اولیه](#ارزیابی‌های-اولیه)
 - [پرداخت‌ها](#پرداخت‌ها)
 - [فاکتورها](#فاکتورها)
+- [پنل حسابداری (راهنمای فرانت)](../accounting/README.md)
 - [درباره ما](#درباره-ما)
 - [اعلان‌ها](#اعلان‌ها)
 - [پیامک](#پیامک)
@@ -332,13 +296,16 @@ GET /appointments
 | `date` | `YYYY-MM-DD` |
 | `doctor_id` | UUID |
 | `client_id` | UUID |
-| `payment_status` | `pending`, `paid`, `unpaid` |
+| `payment_status` | فیلتر روی `payments.status`: `pending`, `paid`, `unpaid`, `partial`, `refunded` |
+| `from_date`, `to_date` | بازه روی `appointment.date` |
 | `sort_by` | `date`, `time`, `amount`, `status`, `created_at` |
 | `sort_direction` | `asc` / `desc` |
 | `per_page` | پیش‌فرض ۱۰، ۱ تا ۱۰۰ |
 | `page` | — |
 
 **پاسخ `200`:** pagination — `AppointmentResource`
+
+در پاسخ، وضعیت پرداخت داخل `payment` است (فیلد سطح‌بالای `payment_status` نیست). `doctor` و `client` به صورت آبجکت تکی برمی‌گردند. فیلد `service` نیز برمی‌گردد.
 
 ### ایجاد
 
@@ -354,15 +321,21 @@ Content-Type: application/json
 | `date` | بله | date |
 | `time` | بله | string، حداکثر ۲۰ |
 | `amount` | بله | integer ≥ 0 |
+| `service` | خیر | نوع خدمت، حداکثر ۲۵۵ |
 | `status` | بله | `pending`, `done` |
-| `payment_status` | بله | `pending`, `paid`, `unpaid` |
+| `payment_status` | بله | `pending`, `paid`, `unpaid`, `partial`, `refunded` |
+| `paid_amount` | برای `partial` بله | integer؛ `0 < paid_amount < amount` |
+| `payment_method` | خیر | `cash`, `card`, `transfer`, `other` |
 
 **پاسخ `201`:** `AppointmentResource`
 
 **رفتار پرداخت:**
 
-- `payment_status=paid` → مبلغ payment = amount نوبت
-- `pending` یا `unpaid` → مبلغ payment = 0
+- `amount` روی payment همیشه برابر مبلغ نوبت است
+- `paid` → `paid_amount = amount`
+- `pending` / `unpaid` / `refunded` → `paid_amount = 0`
+- `partial` → `0 < paid_amount < amount`
+- هر تغییر در لاگ `payment_transactions` ثبت می‌شود
 
 ### جزئیات / ویرایش / حذف
 
@@ -373,7 +346,7 @@ PATCH  /appointments/{appointment}
 DELETE /appointments/{appointment}
 ```
 
-**ویرایش:** تمام فیلدهای create حتی در PATCH الزامی‌اند.
+**ویرایش:** تمام فیلدهای create حتی در PATCH الزامی‌اند (از جمله برای تغییر فقط `payment_status`).
 
 ---
 
@@ -442,13 +415,15 @@ Content-Type: multipart/form-data
 
 ## منابع پزشک
 
+ادمین می‌تواند منابع هر پزشک را مدیریت کند. خود پزشک نیز از پنل خودش (`/doctor/resources`) همین قابلیت را دارد.
+
 ### فهرست
 
 ```http
 GET /doctors/{doctor}/resources
 ```
 
-Query: `search`, `type` (`link|file`), `sort_by`, `sort_direction`, `per_page` (۱–۱۰۰), `page`
+Query: `search`, `type` (`link|file`), `sort_by` (`created_at|updated_at|title|type`), `sort_direction`, `per_page` (۱–۱۰۰), `page`
 
 **پاسخ `200`:** pagination — `DoctorResourceItemResource`
 
@@ -464,8 +439,8 @@ Content-Type: multipart/form-data
 | `title` | بله | حداکثر ۲۵۵ |
 | `type` | بله | `link` یا `file` |
 | `description` | خیر | — |
-| `link` | برای `type=link` | URL، حداکثر ۵۰۰ |
-| `file` | برای `type=file` | حداکثر ۱۰ MB |
+| `link` | برای `type=link` | URL، حداکثر ۲۵۵ (برای `file` ممنوع) |
+| `file` | برای `type=file` | حداکثر ۱۰ MB (برای `link` ممنوع) |
 
 **پاسخ `201`**
 
@@ -586,18 +561,24 @@ DELETE /assessments/{initAssessment}
 
 ## پرداخت‌ها
 
-### فهرست
+> راهنمای کامل پنل حسابداری: [docs/accounting](../accounting/README.md)
+
+### فهرست / جزئیات
 
 ```http
 GET /payments
+GET /payments/{payment}
 ```
 
 | Query | پیش‌فرض | توضیح |
 |-------|---------|--------|
 | `client_id` | — | UUID |
-| `status` | — | `pending`, `paid`, `unpaid` |
+| `doctor_id` | — | UUID |
+| `status` | — | `pending`, `paid`, `unpaid`, `partial`, `refunded` |
+| `method` | — | `cash`, `card`, `transfer`, `other` |
+| `from_date`, `to_date` | — | روی `created_at` |
 | `search` | — | نام/تلفن client |
-| `sort_by` | `created_at` | `created_at`, `amount`, `status`, `updated_at` |
+| `sort_by` | `created_at` | `created_at`, `amount`, `paid_amount`, `status`, `updated_at` |
 | `sort_direction` | `desc` | — |
 | `per_page` | `15` | ۱ تا ۱۰۰ |
 | `page` | `1` | — |
@@ -608,72 +589,37 @@ GET /payments
 {
   "id": "uuid",
   "appointment_id": "uuid",
-  "status": "pending",
-  "amount": 0,
+  "status": "paid",
+  "amount": 500000,
+  "paid_amount": 500000,
+  "method": "cash",
   "appointment": { "...": "AppointmentResource" },
   "created_at": "...",
   "updated_at": "..."
 }
 ```
 
-> وضعیت پرداخت از طریق ایجاد/ویرایش نوبت مدیریت می‌شود؛ endpoint مستقل create/update ندارد.
+> وضعیت پرداخت فقط از مسیر ایجاد/ویرایش نوبت مدیریت می‌شود. لاگ تغییرات: `GET /payment-transactions`.
 
 ---
 
 ## فاکتورها
 
-### فهرست
+> مدل حسابداری: هدر + اقلام در دیتابیس. چاپ/PDF سمت فرانت است. جزئیات کامل: [راهنمای حسابداری](../accounting/README.md).
 
 ```http
-GET /invoices
+GET    /invoices
+POST   /invoices
+GET    /invoices/{invoice}
+PUT    /invoices/{invoice}
+PATCH  /invoices/{invoice}
+DELETE /invoices/{invoice}
+POST   /invoices/suggest-items
 ```
 
-بدون query و pagination؛ همه فاکتورها به ترتیب نزولی ایجاد.
+**ایجاد — فیلدهای مهم:** `client_id`, `issue_date`, `items[]` با `description`, `unit`, `quantity`, `unit_price` (و اختیاری `appointment_id`).
 
-**پاسخ `200`:** آرایه `InvoiceResource`
-
-### تولید فاکتور
-
-```http
-POST /invoices/generate
-Content-Type: application/json
-```
-
-```json
-{
-  "client_id": "uuid",
-  "from_date": "2026-01-01",
-  "to_date": "2026-01-31",
-  "admin_id": "uuid-optional"
-}
-```
-
-| فیلد | الزامی | توضیح |
-|------|--------|--------|
-| `client_id` | بله | UUID user موجود |
-| `from_date` | بله | date |
-| `to_date` | بله | date، ≥ from_date |
-| `admin_id` | خیر | پیش‌فرض: ادمین فعلی |
-
-**پاسخ `201`:** `InvoiceResource`
-
-```json
-{
-  "id": "uuid",
-  "client_id": "uuid",
-  "admin_id": "uuid",
-  "from_date": "2026-01-01",
-  "to_date": "2026-01-31",
-  "file_path": "invoices/...",
-  "file_url": "https://...",
-  "client": { "...": "ClientResource" },
-  "admin": { "...": "AdminResource" },
-  "created_at": "...",
-  "updated_at": "..."
-}
-```
-
-> خروجی فایل JSON در storage است، نه PDF.
+**پیشنهاد اقلام از نوبت:** `POST /invoices/suggest-items` با `client_id` + بازه تاریخ؛ فاکتور ذخیره نمی‌شود.
 
 ---
 
@@ -1132,6 +1078,7 @@ DELETE /comments/{comment}
 GET /backup/admins
 GET /backup/doctors
 GET /backup/clients
+GET /backup/resumes
 GET /backup/posts
 GET /backup/categories
 GET /backup/tags
@@ -1173,6 +1120,7 @@ GET /backup/about
 POST /restore/admins
 POST /restore/doctors
 POST /restore/clients
+POST /restore/resumes
 POST /restore/posts
 POST /restore/categories
 POST /restore/tags
@@ -1181,22 +1129,104 @@ POST /restore/about
 Content-Type: application/json
 ```
 
-**بدنه:**
+### نحوه ارسال داده
+
+سه روش پشتیبانی می‌شود:
+
+**۱. JSON body (پیشنهادی):**
+
+```json
+{
+  "data": [ { "...": "..." } ]
+}
+```
+
+**۲. آرایه خام:**
+
+```json
+[ { "...": "..." } ]
+```
+
+**۳. آپلود فایل:**
+
+```http
+Content-Type: multipart/form-data
+file: doctors_backup.json
+```
+
+> اگر هنگام آپلود فایل خطای `Unable to create temporary file` دیدید، به‌جای multipart، محتوای JSON را با `Content-Type: application/json` در body بفرستید.
+
+### کلیدهای طبیعی (بدون وابستگی به ID)
+
+بازیابی بر اساس ID قدیمی انجام **نمی‌شود**. تطبیق به این صورت است:
+
+| نوع | کلید تطبیق |
+|-----|------------|
+| admins / doctors / clients | `phone` |
+| resumes | `doctor_phone` (یا `phone` / `doctor.phone`) |
+| categories / tags / workshops / posts | `slug` |
+| posts → نویسنده | `author_phone` |
+| posts → دسته‌بندی | `category_slug` |
+| posts → تگ‌ها | `tag_slugs[]` یا `tags[].slug` |
+| about | تک‌رکوردی (upsert) |
+
+**نمونه پزشک (فرمت قدیمی یا جدید):**
 
 ```json
 {
   "data": [
-    { "id": "uuid", "...": "سایر فیلدها" }
-  ],
-  "type": "posts"
+    {
+      "name": "دکتر علی محرابی",
+      "phone": "09131889355",
+      "email": "ali@gmail.com",
+      "birth_date": "1981-03-16",
+      "national_code": "5110245123",
+      "card_number": "6037697144523652",
+      "medical_number": "51223654",
+      "avatar": "doctor_avatars/xxx.jpg",
+      "days": null,
+      "times": null,
+      "password": "$2y$10$...",
+      "resume": "doctor_resumes/xxx.pdf"
+    }
+  ]
 }
 ```
 
-| فیلد | الزامی | توضیح |
-|------|--------|--------|
-| `data` | بله | array از objectها |
-| `data.*.id` | بله | UUID |
-| `type` | خیر | یکی از `admins`, `doctors`, `clients`, `posts`, `categories`, `tags`, `workshops`, `about` |
+**نمونه رزومه:**
+
+```json
+{
+  "data": [
+    {
+      "doctor_phone": "09131889355",
+      "title": "رزومه دکتر علی محرابی",
+      "bio": "...",
+      "specialization": "...",
+      "skills": ["CBT"],
+      "file_path": null
+    }
+  ]
+}
+```
+
+**نمونه پست:**
+
+```json
+{
+  "data": [
+    {
+      "title": "عنوان",
+      "slug": "post-slug",
+      "content": "...",
+      "status": "published",
+      "author_phone": "09140379929",
+      "category_slug": "general-mental-health",
+      "tag_slugs": ["mental-health", "couples-therapy"]
+    }
+  ]
+}
+```
 
 **پاسخ `200`:**
 
@@ -1205,27 +1235,28 @@ Content-Type: application/json
   "message": "Data restored successfully.",
   "data": {
     "id": "restore-log-uuid",
-    "type": "posts",
+    "type": "doctors",
     "created_at": "...",
     "updated_at": "..."
   }
 }
 ```
 
-**رفتار:**
+### ترتیب پیشنهادی بازیابی
 
-- `updateOrCreate` بر اساس `id`
-- رکوردهای موجود که در backup نیستند حذف نمی‌شوند
-- `created_at`/`updated_at` ورودی نادیده گرفته می‌شوند
-- import تراکنشی است؛ خطای یک آیتم همه را rollback می‌کند
+1. `admins` / `doctors` / `clients`
+2. `resumes` (نیاز به `doctor_phone`)
+3. `categories` / `tags`
+4. `posts` (نیاز به `author_phone` و در صورت نیاز `category_slug` / `tag_slugs`)
+5. `workshops` / `about`
 
-**محدودیت‌ها:**
+### نکات
 
-- فایل upload نمی‌پذیرد؛ JSON backup را بخوانید و `data` را بفرستید
-- `type` در body می‌تواند endpoint را override کند
-- روابط (tagهای پست، comments، sessions، participants، doctor profile) restore نمی‌شوند
-- فایل‌های media بازیابی نمی‌شوند
-- ترتیب restore مهم است (مثلاً author و category قبل از post)
+- `id` عددی قدیمی نادیده گرفته می‌شود؛ UUID جدید ساخته می‌شود.
+- passwordهای bcrypt موجود بدون double-hash ذخیره می‌شوند.
+- فیلدهای قدیمی مثل `role` → `admin_role`، `logo_path` → `logo`، `lat`/`long` → `latitude`/`longitude`، `admin_id` → `author_id` پشتیبانی می‌شوند.
+- فایل‌های media بازیابی نمی‌شوند؛ فقط path ذخیره می‌شود.
+- import تراکنشی است؛ خطای یک آیتم همه را rollback می‌کند.
 
 ---
 
@@ -1233,4 +1264,5 @@ Content-Type: application/json
 
 - [APIهای عمومی](../public/README.md)
 - [پنل پزشک / تراپیست](../doctor/README.md)
+- [پنل حسابداری](../accounting/README.md)
 - [فهرست اصلی](../README.md)

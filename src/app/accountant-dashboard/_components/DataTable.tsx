@@ -13,7 +13,7 @@ export default function DataTable({
   columns,
   data,
   isLoading,
-  emptyMessage = "No data found",
+  emptyMessage = "داده‌ای یافت نشد",
   onRowClick,
   className,
 }: {
@@ -34,17 +34,17 @@ export default function DataTable({
     return (
       <div
         className={cn(
-          "bg-white rounded-2xl border border-slate-100 overflow-hidden",
+          "bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden",
           className
         )}
       >
         <Table>
           <TableHeader>
-            <TableRow className="bg-slate-50/50">
+            <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
               {columns.map((col, idx) => (
                 <TableHead
                   key={idx}
-                  className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                  className="text-xs font-semibold text-slate-600 dark:text-slate-300 tracking-wider"
                 >
                   {col.header}
                 </TableHead>
@@ -71,11 +71,11 @@ export default function DataTable({
     return (
       <div
         className={cn(
-          "bg-white rounded-2xl border border-slate-100 p-12 text-center",
+          "bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-12 text-center",
           className
         )}
       >
-        <p className="text-slate-500">{emptyMessage}</p>
+        <p className="text-slate-500 dark:text-slate-400">{emptyMessage}</p>
       </div>
     );
   }
@@ -83,18 +83,18 @@ export default function DataTable({
   return (
     <div
       className={cn(
-        "bg-white rounded-2xl border border-slate-100 overflow-hidden",
+        "bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden",
         className
       )}
     >
       <Table>
         <TableHeader>
-          <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
+          <TableRow className="bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
             {columns.map((col, idx) => (
               <TableHead
                 key={idx}
                 className={cn(
-                  "text-xs font-semibold text-slate-600 uppercase tracking-wider py-4",
+                  "text-xs font-semibold text-slate-600 dark:text-slate-300 tracking-wider py-4",
                   col.className
                 )}
               >
@@ -109,14 +109,18 @@ export default function DataTable({
               key={row.id || rowIdx}
               onClick={() => onRowClick?.(row)}
               className={cn(
-                "transition-colors",
-                onRowClick && "cursor-pointer hover:bg-slate-50"
+                "transition-colors border-slate-100 dark:border-slate-800",
+                onRowClick &&
+                  "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60"
               )}
             >
               {columns.map((col, colIdx) => (
                 <TableCell
                   key={colIdx}
-                  className={cn("py-4", col.cellClassName)}
+                  className={cn(
+                    "py-4 text-slate-800 dark:text-slate-200",
+                    col.cellClassName
+                  )}
                 >
                   {col.render ? col.render(row) : row[col.accessor!]}
                 </TableCell>

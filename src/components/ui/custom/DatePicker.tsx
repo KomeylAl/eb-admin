@@ -13,10 +13,11 @@ const CustomDatePicker = ({ value, onChange }: CustomDatePickerProps) => {
     <DatePicker
       calendar={persian}
       locale={fa}
-      format="YYYY-MM-DD"
-      value={value}
+      format="YYYY/MM/DD"
+      value={value || undefined}
       onChange={onChange}
-      inputClass="w-full bg-white h-9 px-3 py-1 text-base shadow-xs rounded-md border border-gray-200 dark:border-gray-700 dark:bg-gray-800 px-2"
+      containerClassName="w-full"
+      inputClass="w-full bg-white h-9 px-3 py-1 text-base shadow-xs rounded-md border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
       className=""
     />
   );

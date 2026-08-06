@@ -14,11 +14,11 @@ const Payments = () => {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, error, refetch } = usePayments(
+  const { data, isLoading, error, refetch } = usePayments({
     page,
     pageSize,
-    search
-  );
+    search,
+  });
 
   const debouncedSearch = useCallback(
     debounce((text) => {

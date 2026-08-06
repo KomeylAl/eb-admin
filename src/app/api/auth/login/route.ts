@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { applyAuthCookies, roleFromUser } from "@/lib/authSession";
 
 export async function POST(req: NextRequest) {
   const { phone, password } = await req.json();
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
     // Sanctum: { data: { user, token, token_type } }
     const token = payload?.data?.token ?? payload?.token;
     const user = payload?.data?.user ?? payload?.user;
-    const adminRole = user?.admin_role ?? user?.role;
+    const adminRole = roleFromUser(user);
 
     if (!token || !user) {
       return NextResponse.json(
@@ -49,27 +50,14 @@ export async function POST(req: NextRequest) {
       role: adminRole,
     };
 
-    const headers = new Headers();
-    headers.append(
-      "Set-Cookie",
-      `token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax`
-    );
-    if (adminRole) {
-      headers.append(
-        "Set-Cookie",
-        `role=${adminRole}; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax`
-      );
-    }
+    const result = NextResponse.json({
+      message: payload?.message ?? "Logged in successfully.",
+      user: normalizedUser,
+      token,
+      token_type: payload?.data?.token_type ?? "Bearer",
+    });
 
-    return NextResponse.json(
-      {
-        message: payload?.message ?? "Logged in successfully.",
-        user: normalizedUser,
-        token,
-        token_type: payload?.data?.token_type ?? "Bearer",
-      },
-      { headers }
-    );
+    return applyAuthCookies(result, token, adminRole);
   } catch (error: any) {
     console.log(error);
     return NextResponse.json(

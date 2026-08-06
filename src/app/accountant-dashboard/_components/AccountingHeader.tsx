@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, ChevronDown, User } from "lucide-react";
+import { Bell, ChevronDown, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,9 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useUser } from "@/context/UserContext";
+import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 
 export default function AccountingHeader({
   title,
@@ -22,68 +22,74 @@ export default function AccountingHeader({
 }) {
   const { user, logout } = useUser();
 
+  const displayName = user?.full_name || user?.name || "حسابدار";
+
   const getInitials = (name: string) => {
-    if (!name) return "U";
+    if (!name) return "ح";
     return name
       .split(" ")
       .map((n) => n[0])
       .join("")
-      .toUpperCase()
       .slice(0, 2);
   };
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
-        {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
+    <header className="accounting-header h-16 bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md flex items-center justify-between px-6 md:px-8 sticky top-0 z-40 transition-colors print-hidden">
+      <div className="min-w-0">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 truncate">
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+            {subtitle}
+          </p>
+        )}
       </div>
 
-      <div className="flex items-center gap-6">
-        {/* Search */}
-        <div className="relative hidden md:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input
-            placeholder="Search transactions..."
-            className="w-64 pl-10 bg-slate-50 border-slate-200 focus:bg-white"
-          />
-        </div>
+      <div className="flex items-center gap-2 md:gap-3">
+        <ThemeToggleButton
+          className="relative flex items-center justify-center text-slate-500 transition-colors bg-white border border-slate-200 rounded-xl h-10 w-10 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+        />
 
-        {/* Notifications */}
-        <button className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors">
-          <Bell className="w-5 h-5 text-slate-600" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full" />
+        <button
+          type="button"
+          className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          aria-label="اعلان‌ها"
+        >
+          <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
 
-        {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 p-1.5 pr-3 rounded-lg hover:bg-slate-100 transition-colors">
+            <button
+              type="button"
+              className="flex items-center gap-3 p-1.5 pl-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
               <Avatar className="w-8 h-8 bg-linear-to-br from-emerald-400 to-teal-500">
                 <AvatarFallback className="bg-transparent text-white text-xs font-medium">
-                  {getInitials(user?.full_name)}
+                  {getInitials(displayName)}
                 </AvatarFallback>
               </Avatar>
-              <div className="hidden md:block text-left">
-                <p className="text-sm font-medium text-slate-900">
-                  {user?.full_name || "Accountant"}
+              <div className="hidden md:block text-right">
+                <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                  {displayName}
                 </p>
-                <p className="text-xs text-slate-500">Accountant</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  حسابدار
+                </p>
               </div>
               <ChevronDown className="w-4 h-4 text-slate-400" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuLabel>حساب کاربری</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="w-4 h-4 mr-2" />
-              Profile Settings
+            <DropdownMenuItem disabled>
+              <User className="w-4 h-4 ml-2" />
+              پروفایل
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logout()}>
-              Sign Out
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => logout()}>خروج</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

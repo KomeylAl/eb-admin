@@ -1,30 +1,33 @@
+import { authHeaders, backendUrl } from "@/lib/backend";
+import { toAppointmentPayload } from "@/lib/appointmentPayload";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const token = req.cookies.get("token");
   const { id } = await params;
-  const data = await req.json();
+  const body = await req.json();
+  const data = toAppointmentPayload(body);
 
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}api/v1/appointments/${id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${token?.value}`,
-        },
-      }
-    );
+    const response = await fetch(backendUrl(`appointments/${id}`), {
+      method: "PATCH",
+      body: JSON.stringify(data),
+      headers: {
+        ...authHeaders(token?.value),
+        "Content-Type": "application/json",
+      },
+    });
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({}));
       console.log(error);
       return NextResponse.json(
-        { message: "Error adding app" },
+        {
+          message: error?.message || "Error updating appointment",
+          errors: error?.errors ?? null,
+        },
         { status: response.status }
       );
     }
@@ -33,9 +36,10 @@ export async function POST(
       { message: "App updated Successfuly" },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { message: `Something went wrong: ${error.message}` },
+      { message: `Something went wrong: ${message}` },
       { status: 500 }
     );
   }
@@ -43,7 +47,7 @@ export async function POST(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const token = req.cookies.get("token");
   const { id } = await params;
@@ -53,16 +57,13 @@ export async function DELETE(
   }
 
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}api/v1/appointments/${id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${token?.value}`,
-        },
-      }
-    );
+    const response = await fetch(backendUrl(`appointments/${id}`), {
+      method: "DELETE",
+      headers: {
+        ...authHeaders(token?.value),
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
       return NextResponse.json(
@@ -75,7 +76,7 @@ export async function DELETE(
       { message: "Appointment deleted successfully" },
       { status: 200 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { message: "Something went wrong" },
       { status: 500 }

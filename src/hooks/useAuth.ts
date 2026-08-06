@@ -1,4 +1,5 @@
 import { useUser } from "@/context/UserContext";
+import { dashboardForRole, roleFromUser } from "@/lib/authSession";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -18,9 +19,19 @@ type ChangePasswordData = {
   password_confirmation: string;
 };
 
+type AuthUser = {
+  admin_role?: string | null;
+  role?: string | null;
+};
+
+type AuthSuccess = {
+  user: AuthUser;
+};
+
 async function postAuth<T>(url: string, data?: unknown): Promise<T> {
   const res = await fetch(url, {
     method: "POST",
+    credentials: "same-origin",
     headers: data ? { "Content-Type": "application/json" } : undefined,
     body: data ? JSON.stringify(data) : undefined,
   });
@@ -39,18 +50,25 @@ async function postAuth<T>(url: string, data?: unknown): Promise<T> {
   return result as T;
 }
 
-export function useLogin(onLogedIn: () => void) {
+function redirectAfterLogin(user: AuthUser) {
+  const destination = dashboardForRole(roleFromUser(user));
+  // Full navigation ensures Set-Cookie from the login response is applied
+  // before the next protected route runs (client soft-nav can bounce to /auth/login).
+  window.location.assign(destination);
+}
+
+export function useLogin() {
   const { setUser } = useUser();
   return useMutation({
     mutationFn: (data: LoginCredentials) =>
-      postAuth<{ user: unknown }>("/api/auth/login", data),
+      postAuth<AuthSuccess>("/api/auth/login", data),
     onError(error) {
       toast.error(error.message);
     },
     onSuccess: (result) => {
       setUser(result.user);
       toast.success("با موفقیت وارد شدید. لطفا کمی صبر کنید.");
-      onLogedIn();
+      redirectAfterLogin(result.user);
     },
   });
 }
@@ -65,16 +83,16 @@ export function useRequestLoginOtp() {
   });
 }
 
-export function useVerifyLoginOtp(onLogedIn: () => void) {
+export function useVerifyLoginOtp() {
   const { setUser } = useUser();
   return useMutation({
     mutationFn: (data: OtpCredentials) =>
-      postAuth<{ user: unknown }>("/api/auth/otp/verify", data),
+      postAuth<AuthSuccess>("/api/auth/otp/verify", data),
     onError: (error) => toast.error(error.message),
     onSuccess: (result) => {
       setUser(result.user);
       toast.success("با موفقیت وارد شدید. لطفا کمی صبر کنید.");
-      onLogedIn();
+      redirectAfterLogin(result.user);
     },
   });
 }

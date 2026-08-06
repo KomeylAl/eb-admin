@@ -1,27 +1,52 @@
-import { adaptBackendResponse } from "@/lib/backend";
+import { adaptBackendResponse, backendUrl, authHeaders } from "@/lib/backend";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const token = req.cookies.get("token");
   const params = req.nextUrl.searchParams;
-  const page = params.get("page") || 0;
-  const pageSize = params.get("pageSize") || params.get("size") || "10";
-  const search = params.get("search") || "";
-  const clientId = params.get("clientId") || "";
+
+  const qs = new URLSearchParams();
+  const page = params.get("page") || "1";
+  const pageSize = params.get("pageSize") || params.get("size") || "15";
+  qs.set("page", page);
+  qs.set("per_page", pageSize);
+
+  for (const key of [
+    "search",
+    "client_id",
+    "doctor_id",
+    "status",
+    "method",
+    "from_date",
+    "to_date",
+    "sort_by",
+    "sort_direction",
+  ] as const) {
+    const camel =
+      key === "client_id"
+        ? "clientId"
+        : key === "doctor_id"
+          ? "doctorId"
+          : key === "from_date"
+            ? "fromDate"
+            : key === "to_date"
+              ? "toDate"
+              : key === "sort_by"
+                ? "sortBy"
+                : key === "sort_direction"
+                  ? "sortDirection"
+                  : key;
+    const val = params.get(key) || params.get(camel) || "";
+    if (val) qs.set(key, val);
+  }
 
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}api/v1/payments?page=${page}&per_page=${pageSize}&search=${search}&client_id=${clientId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${token?.value}`,
-        },
-      }
-    );
+    const response = await fetch(`${backendUrl("payments")}?${qs}`, {
+      method: "GET",
+      headers: authHeaders(token?.value),
+    });
     if (!response.ok) {
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       return NextResponse.json({ message: data }, { status: response.status });
     }
 

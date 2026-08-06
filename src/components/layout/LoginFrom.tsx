@@ -16,7 +16,6 @@ import imagePlaceholder from "../../../public/images/login_placeholder.jpg";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   useLogin,
@@ -43,14 +42,10 @@ export function LoginForm({
   const [otpSent, setOtpSent] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
 
-  const router = useRouter();
-  const { mutate: login, isPending } = useLogin(() => {
-    router.push("/");
-  });
+  const { mutate: login, isPending } = useLogin();
   const { mutate: requestOtp, isPending: isRequestingOtp } =
     useRequestLoginOtp();
-  const { mutate: verifyOtp, isPending: isVerifyingOtp } =
-    useVerifyLoginOtp(() => router.push("/"));
+  const { mutate: verifyOtp, isPending: isVerifyingOtp } = useVerifyLoginOtp();
 
   useEffect(() => {
     if (resendSeconds <= 0) return;

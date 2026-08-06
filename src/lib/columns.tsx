@@ -7,6 +7,9 @@ import {
   convertPostStatus,
   convertRole,
   dateConvert,
+  formatMoney,
+  paymentMethodLabel,
+  paymentStatusLabel,
 } from "./utils";
 import { MdInsertChart } from "react-icons/md";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
@@ -323,23 +326,46 @@ export const departmentColumns = [
 ];
 
 export const paymentColumns = [
-  { header: "مراجع", accessor: (item: any) => item.referral.client.name },
-  { header: "متخصص", accessor: (item: any) => item.referral.doctor.name },
+  {
+    header: "مراجع",
+    accessor: (item: any) =>
+      item.appointment?.client?.name ?? item.client?.name ?? "—",
+  },
+  {
+    header: "متخصص",
+    accessor: (item: any) =>
+      item.appointment?.doctor?.name ?? item.doctor?.name ?? "—",
+  },
+  {
+    header: "خدمت",
+    accessor: (item: any) => item.appointment?.service ?? "—",
+  },
   {
     header: "تاریخ مراجعه",
-    accessor: (item: any) => dateConvert(item.referral.date),
+    accessor: (item: any) =>
+      item.appointment?.date ? dateConvert(item.appointment.date) : "—",
   },
   {
     header: "مبلغ",
-    accessor: (item: any) => item.referral.amount,
-    cellClassName: (item: any) =>
-      item.status === "unpaid" ? "text-amber-500" : "text-sky-600",
+    accessor: (item: any) => formatMoney(item.amount),
+  },
+  {
+    header: "پرداخت‌شده",
+    accessor: (item: any) => formatMoney(item.paid_amount),
+  },
+  {
+    header: "روش",
+    accessor: (item: any) => paymentMethodLabel(item.method),
   },
   {
     header: "وضعیت",
-    accessor: (item: any) =>
-      item.status === "paid" ? "پرداخت شده" : "پرداخت نشده",
-    cellClassName: (item: any) =>
-      item.status === "unpaid" ? "text-rose-500" : "text-green-500",
+    accessor: (item: any) => paymentStatusLabel(item.status),
+    cellClassName: (item: any) => {
+      if (item.status === "paid") return "text-emerald-600";
+      if (item.status === "unpaid" || item.status === "refunded")
+        return "text-rose-500";
+      if (item.status === "partial") return "text-blue-600";
+      return "text-amber-600";
+    },
   },
 ];

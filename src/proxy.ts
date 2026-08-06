@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-function dashboardForRole(role?: string) {
-  switch (role) {
-    case "author":
-      return "/content-dashboard";
-    case "accountant":
-      return "/accountant-dashboard";
-    default:
-      return "/admin-dashboard";
-  }
-}
+import { dashboardForRole } from "@/lib/authSession";
 
 export default function proxy(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
