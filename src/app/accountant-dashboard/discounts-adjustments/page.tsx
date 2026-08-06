@@ -147,7 +147,7 @@ export default function DiscountsAdjustmentsPage() {
       subtitle="ثبت تخفیف، بستانکار و بدهکار"
       actions={
         <>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
             <Select
               value={type || "all"}
               onValueChange={(v) => {
@@ -155,7 +155,7 @@ export default function DiscountsAdjustmentsPage() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="w-40 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+              <SelectTrigger className="w-full sm:w-40 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
                 <SelectValue placeholder="نوع" />
               </SelectTrigger>
               <SelectContent>
@@ -172,7 +172,7 @@ export default function DiscountsAdjustmentsPage() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="w-40 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+              <SelectTrigger className="w-full sm:w-40 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
                 <SelectValue placeholder="وضعیت" />
               </SelectTrigger>
               <SelectContent>
@@ -188,7 +188,7 @@ export default function DiscountsAdjustmentsPage() {
           </div>
           <Button
             onClick={openCreate}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 ml-2" />
             ثبت تعدیل
@@ -220,9 +220,9 @@ export default function DiscountsAdjustmentsPage() {
       <Modal
         isOpen={formModal.isOpen}
         onClose={formModal.closeModal}
-        className="max-w-lg mx-4 shadow-xl"
+        className="max-w-lg w-[calc(100%-1.5rem)] sm:mx-4 shadow-xl"
       >
-        <div className="p-6 md:p-8 space-y-5 w-full">
+        <div className="p-4 sm:p-6 md:p-8 space-y-5 w-full max-h-[85vh] overflow-y-auto">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             {form.id ? "ویرایش تعدیل" : "ثبت تعدیل جدید"}
           </h2>
@@ -308,12 +308,16 @@ export default function DiscountsAdjustmentsPage() {
               />
             </div>
           </div>
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={formModal.closeModal}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={formModal.closeModal}
+            >
               انصراف
             </Button>
             <Button
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto"
               disabled={saving || !form.amount || form.amount < 1}
               onClick={submit}
             >

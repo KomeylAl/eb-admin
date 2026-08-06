@@ -9,15 +9,18 @@ export function useDoctors(
   return useQuery({
     queryKey: ["doctors", page, pageSize, search],
     queryFn: async () => {
-      const res = await fetch(
-        `/api/doctors?page=${page}&pageSize=${pageSize}&search=${search}`
-      );
+      const params = new URLSearchParams({
+        page: String(page || 1),
+        pageSize: String(pageSize),
+        search,
+      });
+      const res = await fetch(`/api/doctors?${params.toString()}`);
       if (res.status !== 200) {
         toast.error("خطا در دریافت اطلاعات");
       }
       return res.json();
     },
-    // placeholderData: (prev) => prev,
+    placeholderData: (prev) => prev,
   });
 }
 

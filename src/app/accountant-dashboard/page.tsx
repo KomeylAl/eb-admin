@@ -247,9 +247,9 @@ export default function AccountingDashboard() {
         />
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6">
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100">
             آخرین پرداخت‌ها
           </h3>
           <Link href="/accountant-dashboard/payments">

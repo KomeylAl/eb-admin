@@ -11,14 +11,11 @@ export const amountStatusOptions = [
 ];
 
 export const apiOptions = (list: any): EntityType[] => {
-  const options: EntityType[] = [];
-  list.map((doctor: any) => {
-    options.push({
-      value: doctor.id,
-      label: doctor.name,
-    });
-  });
-  return options;
+  if (!Array.isArray(list)) return [];
+  return list.map((item: any) => ({
+    value: String(item.id),
+    label: item.name || item.title || String(item.id),
+  }));
 };
 
 export const roleOptions = [

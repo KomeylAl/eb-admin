@@ -38,6 +38,7 @@ export default function DataTable({
           className
         )}
       >
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
@@ -63,6 +64,7 @@ export default function DataTable({
             ))}
           </TableBody>
         </Table>
+        </div>
       </div>
     );
   }
@@ -87,6 +89,7 @@ export default function DataTable({
         className
       )}
     >
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow className="bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
@@ -127,8 +130,9 @@ export default function DataTable({
               ))}
             </TableRow>
           ))}
-        </TableBody>
+          </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

@@ -92,7 +92,7 @@ export default function InvoicePrintTemplate({
       </div>
 
       <div className="px-6 py-4 print:px-0 print:py-3">
-        <div className="grid grid-cols-2 gap-3 mb-4 text-xs no-print-break">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-xs no-print-break print:grid-cols-2">
           <div className="rounded-md border border-slate-200 p-3">
             <p className="font-semibold text-slate-800 mb-1.5 text-sm">
               اطلاعات مراجع

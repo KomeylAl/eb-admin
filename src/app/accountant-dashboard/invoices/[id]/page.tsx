@@ -27,8 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Combobox } from "@/components/ui/custom/Combobox";
-import { useClients } from "@/hooks/useClients";
+import ClientCombobox from "@/components/ui/custom/ClientCombobox";
 import { useAbout } from "@/hooks/useAbout";
 import {
   InvoiceItemInput,
@@ -43,7 +42,6 @@ import {
   getFormattedDate,
   invoiceStatusLabel,
 } from "@/lib/utils";
-import { apiOptions } from "@/lib/selectOptions";
 import toast from "react-hot-toast";
 
 type DraftItem = InvoiceItemInput & { id?: string };
@@ -78,14 +76,13 @@ export default function InvoiceDetailPage() {
   const id = String(params.id || "");
 
   const { data, isLoading, error, refetch } = useInvoice(id);
-  const { data: clientsRes } = useClients(1, 1000, "");
   const { data: aboutRes } = useAbout();
-  const clientsOptions = clientsRes?.data ? apiOptions(clientsRes.data) : [];
   const clinic = aboutRes?.data ?? aboutRes ?? null;
 
   const invoice = data?.data ?? data;
 
   const [clientId, setClientId] = useState("");
+  const [clientLabel, setClientLabel] = useState("");
   const [issueDate, setIssueDate] = useState(getFormattedDate());
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState("draft");
@@ -107,6 +104,7 @@ export default function InvoiceDetailPage() {
   useEffect(() => {
     if (!invoice?.id || hydrated) return;
     setClientId(invoice.client_id || invoice.client?.id || "");
+    setClientLabel(invoice.client?.name || "");
     setIssueDate(invoice.issue_date || getFormattedDate());
     setDueDate(invoice.due_date || "");
     setStatus(invoice.status || "draft");
@@ -194,10 +192,12 @@ export default function InvoiceDetailPage() {
     notes: notes || null,
     subtotal: itemsTotal,
     total: itemsTotal,
-    client:
-      clientsRes?.data?.find((c: any) => c.id === clientId) ||
-      invoice?.client ||
-      null,
+    client: {
+      ...(invoice?.client || {}),
+      name: clientLabel || invoice?.client?.name,
+      phone: invoice?.client?.phone,
+      address: invoice?.client?.address,
+    },
     items,
     clinic: {
       title: clinic?.title,
@@ -254,14 +254,18 @@ export default function InvoiceDetailPage() {
             <ArrowRight className="w-4 h-4 ml-1" />
             بازگشت به لیست
           </Link>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <StatusBadge status={status} />
-            <Button variant="outline" onClick={() => window.print()}>
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={() => window.print()}
+            >
               <Printer className="w-4 h-4 ml-2" />
               چاپ
             </Button>
             <Button
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white flex-1 sm:flex-none"
               disabled={
                 update.isPending ||
                 !clientId ||
@@ -285,12 +289,11 @@ export default function InvoiceDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2 md:col-span-2">
               <Label>مراجع</Label>
-              <Combobox
-                data={clientsOptions}
-                placeholder="انتخاب مراجع"
-                searchPlaceholder="جستجوی مراجع..."
+              <ClientCombobox
                 value={clientId}
-                onChange={(v) => setClientId(String(v))}
+                selectedLabel={clientLabel}
+                onSelectedLabelChange={setClientLabel}
+                onChange={setClientId}
               />
             </div>
             <div className="space-y-2">
@@ -447,7 +450,7 @@ export default function InvoiceDetailPage() {
         </div>
       </div>
 
-      <div className="invoice-print-root">
+      <div className="invoice-print-root overflow-x-auto">
         <InvoicePrintTemplate invoice={printData} />
       </div>
     </AccountingPageShell>

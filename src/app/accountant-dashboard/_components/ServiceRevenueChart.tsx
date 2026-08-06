@@ -38,8 +38,8 @@ export default function ServiceRevenueChart({
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
-        <div className="h-[300px] flex items-center justify-center">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 sm:p-6">
+        <div className="h-[220px] sm:h-[300px] flex items-center justify-center">
           <div className="animate-pulse text-slate-400 dark:text-slate-500">
             در حال بارگذاری…
           </div>
@@ -73,16 +73,16 @@ export default function ServiceRevenueChart({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-6">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 sm:p-6">
+      <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 sm:mb-6">
         {title}
       </h3>
-      <div className="h-[300px]">
+      <div className="h-[220px] sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
             layout="vertical"
-            margin={{ top: 0, right: 20, left: 0, bottom: 0 }}
+            margin={{ top: 0, right: 8, left: 0, bottom: 0 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -105,7 +105,7 @@ export default function ServiceRevenueChart({
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              width={100}
+              width={72}
             />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="revenue" radius={[0, 4, 4, 0]} barSize={24}>

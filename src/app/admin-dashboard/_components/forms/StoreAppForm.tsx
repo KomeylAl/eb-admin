@@ -1,18 +1,13 @@
 "use client";
 
-import { useClients } from "@/hooks/useClients";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAddAppointment } from "@/hooks/useAppointments";
-import {
-  amountStatusOptions,
-  apiOptions,
-  statusOptions,
-} from "@/lib/selectOptions";
-import { useDoctors } from "@/hooks/useDoctors";
+import { amountStatusOptions, statusOptions } from "@/lib/selectOptions";
 import { convertBaseDate, dateConvert } from "@/lib/utils";
-import toast from "react-hot-toast";
 import { Combobox } from "@/components/ui/custom/Combobox";
+import ClientCombobox from "@/components/ui/custom/ClientCombobox";
+import DoctorCombobox from "@/components/ui/custom/DoctorCombobox";
 import CustomDatePicker from "@/components/ui/custom/DatePicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,13 +26,6 @@ const StoreAppForm = ({
   onCloseModal,
   onAddedAppointment,
 }: StoreAppFormProps) => {
-  const { data: clients } = useClients(0, 1000);
-
-  const { data: doctors } = useDoctors(0, 100);
-
-  const clientsOptions = clients ? apiOptions(clients.data) : [];
-  const doctorsOptions = doctors ? apiOptions(doctors.data) : [];
-
   const [date, setDate] = useState<string>("");
 
   const { mutate: storeApp, isPending } = useAddAppointment(() => {
@@ -70,11 +58,8 @@ const StoreAppForm = ({
               name="doctor"
               control={control}
               render={({ field }) => (
-                <Combobox
-                  data={doctorsOptions}
-                  placeholder="انتخاب متخصص"
-                  searchPlaceholder="جستجو..."
-                  value={field?.value ?? ""}
+                <DoctorCombobox
+                  value={String(field?.value ?? "")}
                   onChange={field.onChange}
                 />
               )}
@@ -91,11 +76,8 @@ const StoreAppForm = ({
               name="client"
               control={control}
               render={({ field }) => (
-                <Combobox
-                  data={clientsOptions}
-                  placeholder="انتخاب مراجع"
-                  searchPlaceholder="جستجو..."
-                  value={field?.value ?? ""}
+                <ClientCombobox
+                  value={String(field?.value ?? "")}
                   onChange={field.onChange}
                 />
               )}

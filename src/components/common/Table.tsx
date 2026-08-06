@@ -64,7 +64,7 @@ function Table<T>({
           key={page}
           onClick={() => onPageChange?.(page as number)}
           className={cn(
-            "px-4 py-1 rounded-md text-lg",
+            "px-2.5 sm:px-4 py-1 rounded-md text-sm sm:text-lg",
             currentPage === page
               ? "bg-indigo-100 dark:bg-gray-900 dark:text-white text-blue-600"
               : "text-gray-700 dark:text-gray-500 dark:hover:bg-gray-900 hover:bg-gray-200"
@@ -84,7 +84,7 @@ function Table<T>({
             {columns.map((col, i) => (
               <th
                 key={i}
-                className="px-6 py-6 text-sm font-medium text-gray-700 dark:text-white text-right"
+                className="px-3 sm:px-6 py-4 sm:py-6 text-sm font-medium text-gray-700 dark:text-white text-right whitespace-nowrap"
               >
                 {col.header}
               </th>
@@ -105,7 +105,7 @@ function Table<T>({
               {columns.map((col, colIndex) => (
                 <td
                   key={colIndex}
-                  className={`px-6 py-4 text-sm text-right ${
+                  className={`px-3 sm:px-6 py-3 sm:py-4 text-sm text-right ${
                     col.cellClassName
                       ? col.cellClassName(row)
                       : "text-gray-800 dark:text-gray-300 dark:text-shelfish"
@@ -136,10 +136,11 @@ function Table<T>({
       </table>
 
       {totalPages > 1 && (
-        <div className="w-full flex items-center justify-between px-4 bg-white dark:bg-gray-800 py-6">
+        <div className="w-full flex flex-wrap items-center justify-between gap-2 px-3 sm:px-4 bg-white dark:bg-gray-800 py-4 sm:py-6">
           <Button
             variant="outline"
-            size="lg"
+            size="sm"
+            className="sm:h-10 sm:px-6 sm:text-base"
             disabled={currentPage === 1}
             onClick={() => {
               if (currentPage > 1) {
@@ -150,11 +151,14 @@ function Table<T>({
             قبلی
           </Button>
 
-          <div className="flex items-center gap-1">{renderPageNumbers()}</div>
+          <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto max-w-[50vw] sm:max-w-none">
+            {renderPageNumbers()}
+          </div>
 
           <Button
             variant="outline"
-            size="lg"
+            size="sm"
+            className="sm:h-10 sm:px-6 sm:text-base"
             disabled={currentPage === totalPages + 1}
             onClick={() => {
               if (currentPage < totalPages) {

@@ -22,9 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Combobox } from "@/components/ui/custom/Combobox";
+import ClientCombobox from "@/components/ui/custom/ClientCombobox";
 import { useModal } from "@/hooks/useModal";
-import { useClients } from "@/hooks/useClients";
 import {
   InvoiceItemInput,
   InvoicePayload,
@@ -39,7 +38,6 @@ import {
   getFormattedDate,
   invoiceStatusLabel,
 } from "@/lib/utils";
-import { apiOptions } from "@/lib/selectOptions";
 import toast from "react-hot-toast";
 
 type DraftItem = InvoiceItemInput;
@@ -93,19 +91,19 @@ function normalizeSuggestedItems(payload: any): DraftItem[] {
 export default function InvoicesPage() {
   const router = useRouter();
   const { data, isLoading, error } = useInvoices();
-  const { data: clientsRes } = useClients(1, 1000, "");
-  const clientsOptions = clientsRes?.data ? apiOptions(clientsRes.data) : [];
 
   const formModal = useModal();
   const deleteModal = useModal();
 
   const [form, setForm] = useState<DraftForm>(emptyForm());
   const [selectedId, setSelectedId] = useState("");
+  const [clientLabel, setClientLabel] = useState("");
 
   const suggest = useSuggestInvoiceItems();
   const create = useCreateInvoice((created) => {
     formModal.closeModal();
     setForm(emptyForm());
+    setClientLabel("");
     const id = created?.data?.id ?? created?.id;
     if (id) router.push(`/accountant-dashboard/invoices/${id}`);
   });
@@ -236,19 +234,17 @@ export default function InvoicesPage() {
       title="صورتحساب‌ها"
       subtitle="لیست فاکتورها؛ برای ویرایش اقلام وارد صفحه هر فاکتور شوید"
       actions={
-        <>
-          <div />
-          <Button
-            onClick={() => {
-              setForm(emptyForm());
-              formModal.openModal();
-            }}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
-          >
-            <Plus className="w-4 h-4 ml-2" />
-            فاکتور جدید
-          </Button>
-        </>
+        <Button
+          onClick={() => {
+            setForm(emptyForm());
+            setClientLabel("");
+            formModal.openModal();
+          }}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto"
+        >
+          <Plus className="w-4 h-4 ml-2" />
+          فاکتور جدید
+        </Button>
       }
     >
       <div className="w-full flex items-center justify-center min-h-[200px]">
@@ -260,9 +256,9 @@ export default function InvoicesPage() {
       <Modal
         isOpen={formModal.isOpen}
         onClose={formModal.closeModal}
-        className="max-w-4xl mx-4 shadow-xl"
+        className="max-w-4xl w-[calc(100%-1.5rem)] sm:mx-4 shadow-xl"
       >
-        <div className="p-6 md:p-8 space-y-5 w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 md:p-8 space-y-5 w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             فاکتور جدید
           </h2>
@@ -270,11 +266,10 @@ export default function InvoicesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2 md:col-span-2">
               <Label>مراجع</Label>
-              <Combobox
-                data={clientsOptions}
-                placeholder="انتخاب مراجع"
-                searchPlaceholder="جستجوی مراجع..."
+              <ClientCombobox
                 value={form.client_id}
+                selectedLabel={clientLabel}
+                onSelectedLabelChange={setClientLabel}
                 onChange={(v) =>
                   setForm((p) => ({ ...p, client_id: String(v) }))
                 }
@@ -283,28 +278,28 @@ export default function InvoicesPage() {
             <div className="space-y-2">
               <Label>تاریخ صدور</Label>
               <AccountingDateField
-                value={form.issue_date}
+                value={dateConvert(form.issue_date)}
                 onChange={(v) => setForm((p) => ({ ...p, issue_date: v }))}
               />
             </div>
             <div className="space-y-2">
               <Label>سررسید</Label>
               <AccountingDateField
-                value={form.due_date}
+                value={dateConvert(form.due_date)}
                 onChange={(v) => setForm((p) => ({ ...p, due_date: v }))}
               />
             </div>
             <div className="space-y-2">
               <Label>از تاریخ (بازه نوبت)</Label>
               <AccountingDateField
-                value={form.from_date}
+                value={dateConvert(form.from_date)}
                 onChange={(v) => setForm((p) => ({ ...p, from_date: v }))}
               />
             </div>
             <div className="space-y-2">
               <Label>تا تاریخ (بازه نوبت)</Label>
               <AccountingDateField
-                value={form.to_date}
+                value={dateConvert(form.to_date)}
                 onChange={(v) => setForm((p) => ({ ...p, to_date: v }))}
               />
             </div>
@@ -445,12 +440,16 @@ export default function InvoicesPage() {
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={formModal.closeModal}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={formModal.closeModal}
+            >
               انصراف
             </Button>
             <Button
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto"
               disabled={
                 create.isPending ||
                 !form.client_id ||

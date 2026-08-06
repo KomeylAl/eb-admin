@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}api/v1/clients?page=${page}&per_page=${pageSize}&search=${search}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}api/v1/clients?page=${page}&per_page=${pageSize}&search=${encodeURIComponent(search)}`,
       {
         method: "GET",
         headers: {
