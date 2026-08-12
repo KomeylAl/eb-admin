@@ -117,10 +117,11 @@ POST /invoices/suggest-items
 
 ### جریان پیشنهادی فرانت
 
-1. ایجاد فاکتور از لیست (`POST /invoices`) → هدایت به صفحهٔ جزئیات `/accountant-dashboard/invoices/[id]`
-2. در صفحهٔ فردی: مراجع + بازه → `POST /invoices/suggest-items` → ویرایش/افزودن/حذف اقلام
-3. `PUT/PATCH /invoices/{id}` → ذخیره
-4. چاپ A4 از همان صفحه (قالب فرانت؛ بدون PDF سمت سرور)
+1. کاربر مراجع + بازه را انتخاب می‌کند  
+2. `POST /invoices/suggest-items` → پر کردن جدول UI  
+3. کاربر اقلام را ویرایش یا دستی اضافه می‌کند  
+4. `POST /invoices` → ذخیره در دیتابیس  
+5. چاپ / PDF فقط در Next.js/React از روی داده API
 
 ---
 
@@ -143,7 +144,7 @@ POST /invoices/suggest-items
 | داشبورد | `/finance/summary` + reports |
 | پرداخت‌ها | `/payments` |
 | درآمد نوبت‌ها | `/appointments` |
-| صورتحساب‌ها | `/invoices` (لیست) + `/invoices/[id]` (جزئیات/ویرایش/چاپ) |
+| صورتحساب‌ها | `/invoices` + `/invoices/suggest-items` |
 | تخفیف‌ها و تعدیلات | `/financial-adjustments` |
 | لاگ تراکنش‌ها | `/payment-transactions` |
 | خروجی / چاپ | سمت فرانت |

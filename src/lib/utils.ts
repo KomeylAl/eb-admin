@@ -134,6 +134,19 @@ export function convertNotifType(type: string) {
   return output;
 }
 
+export function convertCommentableType(type: string) {
+  switch (type) {
+    case "doctor":
+      return "درمانگر";
+    case "post":
+      return "مقاله";
+    case "workshop":
+      return "کارگاه";
+    default:
+      return type;
+  }
+}
+
 export function formatMoney(value: number | string | null | undefined): string {
   const num = typeof value === "string" ? Number(value) : value ?? 0;
   if (Number.isNaN(num)) return "۰";

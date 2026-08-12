@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
+  convertCommentableType,
   convertNotifPriority,
   convertNotifStatus,
   convertNotifType,
@@ -18,6 +19,8 @@ import ClientCard from "@/app/admin-dashboard/_components/cards/ClientCard";
 import DoctorCard from "@/app/admin-dashboard/_components/cards/DoctorCard";
 import NotificationCard from "@/app/admin-dashboard/_components/cards/NotificationCard";
 import { PuffLoader } from "react-spinners";
+import { Button } from "@/components/ui/button";
+import { Check, X } from "lucide-react";
 
 export const appointmentColumns = [
   {
@@ -323,6 +326,74 @@ export const postColumns = [
 export const departmentColumns = [
   { header: "عنوان", accessor: "title" },
   { header: "اسلاگ", accessor: "slug" },
+];
+
+export const commentsColumns = (
+  onApprove: (id: string) => void,
+  onUnapprove: (id: string) => void,
+  isApproving: boolean = false,
+  loadingId: string | null = null
+) => [
+  {
+    header: "نویسنده",
+    accessor: (row: any) =>
+      row.author_name || `${row.first_name ?? ""} ${row.last_name ?? ""}`,
+  },
+  { header: "تلفن", accessor: (row: any) => row.phone || "—" },
+  {
+    header: "متن",
+    accessor: (row: any) => {
+      const body = row.body || "";
+      return body.length > 60 ? `${body.slice(0, 60)}...` : body;
+    },
+  },
+  {
+    header: "امتیاز",
+    accessor: (row: any) => `${row.rating ?? "—"} / 5`,
+  },
+  {
+    header: "هدف",
+    accessor: (row: any) => convertCommentableType(row.commentable_type),
+  },
+  {
+    header: "وضعیت",
+    accessor: (row: any) => (row.approved ? "تأیید شده" : "در انتظار"),
+    cellClassName: (row: any) =>
+      row.approved ? "text-green-600" : "text-amber-500",
+  },
+  {
+    header: "تاریخ",
+    accessor: (row: any) =>
+      row.created_at ? dateConvert(row.created_at) : "—",
+  },
+  {
+    header: "تأیید",
+    accessor: (row: any) => {
+      const busy = isApproving && loadingId === row.id;
+      if (busy) {
+        return <PuffLoader size={24} color="#3e86fa" />;
+      }
+      return row.approved ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          title="لغو تأیید"
+          onClick={() => onUnapprove(row.id)}
+        >
+          <X className="w-4 h-4 text-amber-500" />
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          title="تأیید"
+          onClick={() => onApprove(row.id)}
+        >
+          <Check className="w-4 h-4 text-green-600" />
+        </Button>
+      );
+    },
+  },
 ];
 
 export const paymentColumns = [

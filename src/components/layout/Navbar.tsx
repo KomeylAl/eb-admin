@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   List,
   Mail,
+  MessageSquareText,
   Settings,
   UserRound,
   Users,
@@ -49,6 +50,12 @@ const Navbar = () => {
       link: "/admin-dashboard/assessments",
       access: ["manager", "boss", "receptionist"],
       icon: <CalendarFold />,
+    },
+    {
+      title: "نظرات",
+      link: "/admin-dashboard/comments",
+      access: ["manager", "boss"],
+      icon: <MessageSquareText />,
     },
     {
       title: "مراجعان",
@@ -115,6 +122,12 @@ const Navbar = () => {
       link: "/content-dashboard/workshops",
       access: ["author"],
       icon: <MdClass />,
+    },
+    {
+      title: "نظرات",
+      link: "/content-dashboard/comments",
+      access: ["author"],
+      icon: <MessageSquareText />,
     },
     {
       title: "اعلانات",
