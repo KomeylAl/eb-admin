@@ -26,12 +26,29 @@ export function useClients(
 
 export function useClient(clientId: string = "") {
   return useQuery({
-    queryKey: ["client"],
+    queryKey: ["client", clientId],
     queryFn: async () => {
       const res = await fetch(`/api/clients/${clientId}`);
       return res.json();
     },
+    enabled: Boolean(clientId),
     placeholderData: (prev) => prev,
+  });
+}
+
+export function useClientRecord(clientId: string = "") {
+  return useQuery({
+    queryKey: ["client-record", clientId],
+    queryFn: async () => {
+      const res = await fetch(`/api/clients/${clientId}/record`);
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) {
+        toast.error(payload?.message || "خطا در دریافت پرونده پزشکی");
+        throw new Error(payload?.message || "خطا در دریافت پرونده پزشکی");
+      }
+      return payload;
+    },
+    enabled: Boolean(clientId),
   });
 }
 
@@ -41,7 +58,7 @@ export function useSaveClientRecord(onSuccess: () => void) {
       formData,
       clientId,
     }: {
-      formData: any;
+      formData: FormData;
       clientId: string;
     }) => {
       const res = await fetch(`/api/clients/${clientId}/record`, {
@@ -49,9 +66,10 @@ export function useSaveClientRecord(onSuccess: () => void) {
         body: formData,
       });
       if (!res.ok) {
-        const error = await res.json();
+        const error = await res.json().catch(() => ({}));
         throw new Error(`${error?.message ?? "خطا در ذخیره پرونده"}`);
       }
+      return res.json().catch(() => null);
     },
     onError(error) {
       toast.error(error.message);

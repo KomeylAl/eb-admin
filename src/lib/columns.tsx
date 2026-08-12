@@ -60,6 +60,10 @@ export const appointmentColumns = [
     accessor: (row: any) => row.time + " - " + dateConvert(row.date),
   },
   {
+    header: "اتاق",
+    accessor: (row: any) => row.room?.name || "—",
+  },
+  {
     header: "وضعیت",
     accessor: (row: any) =>
       row.status === "done" ? "انجام شده" : "انجام نشده",

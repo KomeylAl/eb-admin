@@ -13,6 +13,7 @@ import { IoPricetagOutline } from "react-icons/io5";
 import TransitionLink from "@/components/ui/TransitionLink";
 import {
   Bell,
+  Building2,
   CalendarCheck,
   CalendarFold,
   CreditCard,
@@ -44,6 +45,12 @@ const Navbar = () => {
       link: "/admin-dashboard/appointments",
       access: ["manager", "boss", "receptionist"],
       icon: <CalendarCheck />,
+    },
+    {
+      title: "اتاق‌ها",
+      link: "/admin-dashboard/rooms",
+      access: ["manager", "boss", "receptionist"],
+      icon: <Building2 />,
     },
     {
       title: "ارزیابی ها",

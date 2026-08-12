@@ -124,12 +124,12 @@ const Appinments = () => {
                 setPage(newPage);
               }}
               onEdit={(item: any) => {
-                setAppId(item.referral_id);
+                setAppId(item.id);
                 setAppointment(item);
                 openEdit();
               }}
               onDelete={(item: any) => {
-                setAppId(item.referral_id);
+                setAppId(item.id);
                 openDelete();
               }}
             />

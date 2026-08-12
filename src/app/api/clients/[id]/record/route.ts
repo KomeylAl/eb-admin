@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
 
@@ -19,15 +19,13 @@ export async function GET(
       }
     );
     if (!response.ok) {
-      const data = await response.json();
-      console.log(data);
+      const data = await response.json().catch(() => ({}));
       return NextResponse.json(data, { status: response.status });
     }
 
     const data = adaptBackendResponse(await response.json());
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
-    console.log(error);
     return NextResponse.json(
       { message: `Something went wrong: ${error.message}` },
       { status: 500 }
@@ -37,7 +35,7 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   try {
@@ -59,9 +57,12 @@ export async function POST(
     );
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       return NextResponse.json(
-        { message: `${data?.message ?? "Error saving record"}` },
+        {
+          message: `${data?.message ?? "Error saving record"}`,
+          errors: data?.errors,
+        },
         { status: response.status }
       );
     }
@@ -69,7 +70,6 @@ export async function POST(
     const data = adaptBackendResponse(await response.json());
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { message: `Something went wrong: ${error}` },
       { status: 500 }

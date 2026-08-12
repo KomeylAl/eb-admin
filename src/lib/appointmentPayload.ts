@@ -23,6 +23,20 @@ export function toAppointmentPayload(
         : amountRaw,
   };
 
+  if (input.treatment_program_id) {
+    payload.treatment_program_id = input.treatment_program_id;
+  }
+  if (input.create_treatment_program) {
+    payload.create_treatment_program = true;
+    if (input.program_title) payload.program_title = input.program_title;
+  }
+  if (Object.prototype.hasOwnProperty.call(input, "room_id")) {
+    payload.room_id = input.room_id || null;
+  }
+  if (Object.prototype.hasOwnProperty.call(input, "session_notes")) {
+    payload.session_notes = input.session_notes ?? null;
+  }
+
   if (input.service != null && input.service !== "") {
     payload.service = input.service;
   }
