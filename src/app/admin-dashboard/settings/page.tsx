@@ -39,7 +39,7 @@ export default function Settings() {
     <div className="w-full h-full flex flex-col">
       <Header searchFn={() => {}} isShowSearch={false} />
 
-      <div className="p-12 space-y-6">
+      <div className="p-4 sm:p-6 md:p-8 space-y-6">
         <h2 className="font-bold text-2xl">تنظیمات</h2>
 
         <Accordion type="multiple" className="space-y-4">

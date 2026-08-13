@@ -7,25 +7,31 @@ interface Props {
   href: string;
   children: React.ReactNode;
   className?: string;
+  title?: string;
+  onClick?: () => void;
 }
 
-const TransitionLink = ({ href, children, className = "" }: Props) => {
+const TransitionLink = ({
+  href,
+  children,
+  className = "",
+  title,
+  onClick,
+}: Props) => {
   const router = useRouter();
   const pathname = usePathname();
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
+    onClick?.();
     if (pathname === href) return;
 
-    // مرحله اول: انیمیشن خروج
     await animatePageOut();
-
-    // مرحله دوم: ناوبری
     router.push(href);
   };
 
   return (
-    <a href={href} onClick={handleClick} className={className}>
+    <a href={href} onClick={handleClick} className={className} title={title}>
       {children}
     </a>
   );

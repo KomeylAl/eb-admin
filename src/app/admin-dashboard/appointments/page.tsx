@@ -78,7 +78,7 @@ const Appinments = () => {
   return (
     <div className="w-full h-full flex flex-col">
       <Header searchFn={onSearchChange} isShowSearch />
-      <div className="w-full flex flex-col p-12">
+      <div className="w-full flex flex-col p-4 sm:p-6 md:p-8">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-0 lg:items-center lg:justify-between">
           <h2 className="font-bold text-2xl">نوبت ها</h2>
 

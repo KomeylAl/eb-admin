@@ -7,7 +7,7 @@ const Notifications = () => {
   return (
     <div className="w-full h-full flex flex-col">
       <Header searchFn={() => {}} isShowSearch={false} />
-      <div className="w-full flex flex-col p-12">
+      <div className="w-full flex flex-col p-4 sm:p-6 md:p-8">
         <div className="w-full h-full space-y-6">
           <h2 className="font-bold text-2xl">اعلانات</h2>
           <Tabs defaultValue="all" className="w-full overflow-x-auto">

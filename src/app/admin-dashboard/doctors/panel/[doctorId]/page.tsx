@@ -53,7 +53,7 @@ const DoctorPanel = ({ params }: PageProps) => {
     <div className="w-full h-full flex flex-col">
       <Header searchFn={() => {}} isShowSearch={false} />
       <WithRole allowedRoles={["boss", "manager"]}>
-        <div className="w-full p-6 md:p-12">
+        <div className="w-full p-4 sm:p-6 md:p-8">
           <div className="w-full h-full space-y-6">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">

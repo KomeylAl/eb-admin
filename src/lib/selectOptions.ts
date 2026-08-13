@@ -5,6 +5,13 @@ export const statusOptions = [
   { value: "done", label: "انجام شده" },
 ];
 
+export const treatmentProgramStatusOptions = [
+  { value: "active", label: "فعال" },
+  { value: "completed", label: "تکمیل‌شده" },
+  { value: "paused", label: "متوقف" },
+  { value: "cancelled", label: "لغو شده" },
+];
+
 export const amountStatusOptions = [
   { value: "unpaid", label: "پرداخت نشده" },
   { value: "paid", label: "پرداخت شده" },

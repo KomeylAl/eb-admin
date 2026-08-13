@@ -90,7 +90,7 @@ function Table<T>({
               </th>
             ))}
             {showActions && (
-              <th className="px-6 py-3 text-sm font-medium text-gray-700 dark:text-white text-right">
+              <th className="px-3 sm:px-6 py-3 text-sm font-medium text-gray-700 dark:text-white text-right">
                 اقدامات
               </th>
             )}
@@ -117,7 +117,7 @@ function Table<T>({
                 </td>
               ))}
               {showActions && (
-                <td className="px-6 py-4 text-sm text-gray-800 space-x-2">
+                <td className="px-3 sm:px-6 py-4 text-sm text-gray-800 space-x-2">
                   <Button variant="ghost" size="sm" onClick={() => onEdit(row)}>
                     <Pencil className="w-4 h-4 text-blue-500" />
                   </Button>

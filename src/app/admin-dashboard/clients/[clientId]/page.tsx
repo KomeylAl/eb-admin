@@ -14,6 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ClientInfoTab from "../../_components/tabs/ClientInfoTab";
 import ClientRecord from "../../_components/tabs/ClientRecord";
 import { Button } from "@/components/ui/button";
+import TransitionLink from "@/components/ui/TransitionLink";
+import { convertTreatmentProgramStatus } from "@/lib/utils";
 
 interface Params {
   clientId: string;
@@ -54,7 +56,7 @@ const ClientPage = ({ params }: PageProps) => {
     <div className="w-full h-full flex flex-col">
       <Header searchFn={() => {}} isShowSearch={false} />
       <WithRole allowedRoles={["boss", "manager", "receptionist"]}>
-        <div className="w-full h-full p-6 md:p-12">
+        <div className="w-full h-full p-4 sm:p-6 md:p-8">
           <div className="flex-1 space-y-8">
             {(isLoading || programsLoading) && (
               <div className="w-full h-64 flex items-center justify-center">
@@ -89,7 +91,7 @@ const ClientPage = ({ params }: PageProps) => {
                     {programs.map((program: any) => (
                       <div
                         key={program.id}
-                        className="flex items-center justify-between rounded-md border p-4"
+                        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-md border p-4"
                       >
                         <div>
                           <p className="font-medium">
@@ -97,17 +99,26 @@ const ClientPage = ({ params }: PageProps) => {
                           </p>
                           <p className="text-xs text-muted-foreground">
                             درمانگر: {program.doctor?.name || "—"} · وضعیت:{" "}
-                            {program.status}
+                            {convertTreatmentProgramStatus(program.status)} ·
+                            جلسات: {program.appointments_count ?? 0}
                           </p>
                         </div>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedProgramId(String(program.id));
-                          }}
-                        >
-                          انتخاب برای پرونده
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedProgramId(String(program.id));
+                            }}
+                          >
+                            انتخاب برای پرونده
+                          </Button>
+                          <TransitionLink
+                            href={`/admin-dashboard/treatment-programs/${program.id}`}
+                            className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+                          >
+                            صفحه برنامه
+                          </TransitionLink>
+                        </div>
                       </div>
                     ))}
                   </TabsContent>

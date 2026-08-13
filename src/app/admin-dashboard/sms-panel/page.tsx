@@ -51,7 +51,7 @@ const SmsPanel = () => {
   return (
     <div className="w-full h-full flex flex-col">
       <Header isShowSearch={false} searchFn={() => {}} />
-      <div className="flex flex-col lg:flex-row gap-6 p-8">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 p-4 sm:p-6 md:p-8">
         <div className="flex flex-col items-start gap-3 w-full lg:w-[40%]">
           <p className="font-semibold">ارسال پیامک تکی</p>
           <div className="w-full flex flex-col space-y-5">

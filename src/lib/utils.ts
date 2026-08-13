@@ -134,6 +134,34 @@ export function convertNotifType(type: string) {
   return output;
 }
 
+export function convertTreatmentProgramStatus(status: string) {
+  switch (status) {
+    case "active":
+      return "فعال";
+    case "completed":
+      return "تکمیل‌شده";
+    case "paused":
+      return "متوقف";
+    case "cancelled":
+      return "لغو شده";
+    default:
+      return status || "—";
+  }
+}
+
+export function convertHomeworkStatus(status: string) {
+  switch (status) {
+    case "assigned":
+      return "در انتظار";
+    case "done":
+      return "انجام‌شده";
+    case "cancelled":
+      return "لغو شده";
+    default:
+      return status || "—";
+  }
+}
+
 export function convertCommentableType(type: string) {
   switch (type) {
     case "doctor":

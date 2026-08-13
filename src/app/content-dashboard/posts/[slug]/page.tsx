@@ -152,7 +152,7 @@ const Post = ({ params }: PageProps) => {
       {post && (
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-full h-full p-6 sm:p-8 space-y-7"
+          className="w-full h-full p-4 sm:p-6 md:p-8 space-y-7"
         >
           <h2 className="text-xl font-semibold">ویرایش مطلب</h2>
 

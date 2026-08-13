@@ -30,7 +30,7 @@ const WorkshopPanel = ({ params }: PageProps) => {
   return (
     <div className="w-full h-full flex flex-col">
       <Header searchFn={() => {}} isShowSearch={false} />
-      <div className="w-full p-12">
+      <div className="w-full p-4 sm:p-6 md:p-8">
         {data && (
           <div className="w-full h-full space-y-6">
             <div className="flex items-center justify-between">

@@ -40,7 +40,7 @@ const RoomsPage = () => {
     <div className="w-full h-full flex flex-col">
       <Header searchFn={() => {}} isShowSearch={false} />
       <WithRole allowedRoles={["boss", "manager", "receptionist"]}>
-        <div className="p-6 md:p-12 space-y-8">
+        <div className="p-4 sm:p-6 md:p-8 space-y-8">
           <h2 className="font-bold text-2xl">اتاق‌های کلینیک</h2>
 
           <div className="rounded-xl border bg-white p-4 dark:bg-gray-800 space-y-3 max-w-xl">

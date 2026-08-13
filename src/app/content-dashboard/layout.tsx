@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { Toaster } from "react-hot-toast";
-import Sidebar from "@/components/layout/SideBar";
+import DashboardShell from "@/components/layout/DashboardShell";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -17,15 +17,7 @@ export default function AdminLayout({
   return (
     <div className="">
       <Toaster />
-      <div className="h-screen flex bg-gray-100 dark:bg-gray-900">
-        <Sidebar />
-
-        <main className="flex-1 lg:mr-80 overflow-y-auto h-screen">
-          {children}
-        </main>
-
-        <Toaster />
-      </div>
+      <DashboardShell>{children}</DashboardShell>
     </div>
   );
 }

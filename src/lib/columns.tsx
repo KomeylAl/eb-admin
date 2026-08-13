@@ -7,6 +7,7 @@ import {
   convertNotifType,
   convertPostStatus,
   convertRole,
+  convertTreatmentProgramStatus,
   dateConvert,
   formatMoney,
   paymentMethodLabel,
@@ -21,6 +22,52 @@ import NotificationCard from "@/app/admin-dashboard/_components/cards/Notificati
 import { PuffLoader } from "react-spinners";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
+
+export const treatmentProgramColumns = [
+  {
+    header: "عنوان",
+    accessor: (row: any) => (
+      <TransitionLink
+        href={`/admin-dashboard/treatment-programs/${row.id}`}
+        className="text-blue-600 hover:underline font-medium"
+      >
+        {row.title || "برنامه درمان"}
+      </TransitionLink>
+    ),
+  },
+  {
+    header: "مراجع",
+    accessor: (row: any) =>
+      row.client?.id ? (
+        <TransitionLink
+          href={`/admin-dashboard/clients/${row.client.id}`}
+          className="text-violet-600 hover:underline"
+        >
+          {row.client?.name}
+        </TransitionLink>
+      ) : (
+        "—"
+      ),
+  },
+  {
+    header: "درمانگر",
+    accessor: (row: any) => row.doctor?.name || "—",
+    cellClassName: () => "text-cyan-600",
+  },
+  {
+    header: "وضعیت",
+    accessor: (row: any) => convertTreatmentProgramStatus(row.status),
+  },
+  {
+    header: "جلسات",
+    accessor: (row: any) => row.appointments_count ?? 0,
+  },
+  {
+    header: "شروع",
+    accessor: (row: any) =>
+      row.started_at ? dateConvert(row.started_at) : "—",
+  },
+];
 
 export const appointmentColumns = [
   {
