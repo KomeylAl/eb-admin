@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Header from "@/components/layout/Header";
 import WithRole from "../../_components/WithRole";
 import {
+  useDeleteTreatmentProgram,
   useProgramMedicalRecord,
   useTreatmentProgram,
   useUpdateHomework,
@@ -26,6 +27,11 @@ import {
   dateConvert,
 } from "@/lib/utils";
 import { DateObject } from "react-multi-date-picker";
+import { useModal } from "@/hooks/useModal";
+import { Modal } from "@/components/common/Modal";
+import DeleteModal from "@/components/common/DeleteModal";
+import { useRouter } from "next/navigation";
+import DoctorCombobox from "@/components/ui/custom/DoctorCombobox";
 
 interface Params {
   programId: string;
@@ -52,6 +58,7 @@ const ProgressCard = ({
 );
 
 const AdminTreatmentProgramDetailPage = ({ params }: PageProps) => {
+  const router = useRouter();
   const { programId } = React.use(params);
   const { data, isLoading, error, refetch } = useTreatmentProgram(programId);
   const program = data?.data;
@@ -63,11 +70,26 @@ const AdminTreatmentProgramDetailPage = ({ params }: PageProps) => {
   } = useProgramMedicalRecord(programId);
 
   const { mutate: updateProgram, isPending: updating } =
-    useUpdateTreatmentProgram(() => refetch());
+    useUpdateTreatmentProgram(() => {
+      refetch();
+      refetchRecord();
+    });
   const { mutate: updateHomework } = useUpdateHomework(() => refetch());
+  const {
+    isOpen: deleteOpen,
+    openModal: openDelete,
+    closeModal: closeDelete,
+  } = useModal();
+  const { mutate: deleteProgram, isPending: isDeleting } =
+    useDeleteTreatmentProgram(() => {
+      closeDelete();
+      router.push("/admin-dashboard/treatment-programs");
+    });
 
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("active");
+  const [doctorId, setDoctorId] = useState("");
+  const [doctorLabel, setDoctorLabel] = useState("");
   const [startedAt, setStartedAt] = useState("");
   const [endedAt, setEndedAt] = useState("");
 
@@ -75,6 +97,8 @@ const AdminTreatmentProgramDetailPage = ({ params }: PageProps) => {
     if (!program) return;
     setTitle(program.title || "");
     setStatus(program.status || "active");
+    setDoctorId(program.doctor_id || program.doctor?.id || "");
+    setDoctorLabel(program.doctor?.name || "");
     setStartedAt(program.started_at || "");
     setEndedAt(program.ended_at || "");
   }, [program]);
@@ -111,7 +135,7 @@ const AdminTreatmentProgramDetailPage = ({ params }: PageProps) => {
                 {convertTreatmentProgramStatus(program?.status)}
               </p>
             </div>
-            <div className="flex flex-wrap gap-3 text-sm">
+            <div className="flex flex-wrap items-center gap-3 text-sm">
               {program?.client?.id && (
                 <TransitionLink
                   href={`/admin-dashboard/clients/${program.client.id}`}
@@ -126,6 +150,9 @@ const AdminTreatmentProgramDetailPage = ({ params }: PageProps) => {
               >
                 بازگشت به لیست
               </TransitionLink>
+              <Button variant="destructive" size="sm" onClick={openDelete}>
+                حذف برنامه
+              </Button>
             </div>
           </div>
 
@@ -195,6 +222,15 @@ const AdminTreatmentProgramDetailPage = ({ params }: PageProps) => {
                       onChange={(v) => setStatus(String(v))}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label>درمانگر</Label>
+                    <DoctorCombobox
+                      value={doctorId}
+                      selectedLabel={doctorLabel}
+                      onSelectedLabelChange={setDoctorLabel}
+                      onChange={setDoctorId}
+                    />
+                  </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label>تاریخ شروع</Label>
@@ -223,6 +259,7 @@ const AdminTreatmentProgramDetailPage = ({ params }: PageProps) => {
                         body: {
                           title,
                           status,
+                          doctor_id: doctorId || undefined,
                           started_at: startedAt || null,
                           ended_at: endedAt || null,
                         },
@@ -251,6 +288,11 @@ const AdminTreatmentProgramDetailPage = ({ params }: PageProps) => {
                       refetchRecord();
                       refetch();
                     }}
+                    key={
+                      recordPayload?.data?.record?.updated_at ||
+                      program.medical_record?.updated_at ||
+                      programId
+                    }
                   />
                 )}
               </TabsContent>
@@ -331,6 +373,20 @@ const AdminTreatmentProgramDetailPage = ({ params }: PageProps) => {
           )}
         </div>
       </WithRole>
+
+      <Modal
+        showCloseButton={false}
+        isOpen={deleteOpen}
+        onClose={closeDelete}
+        className="max-w-[700px] bg-white"
+      >
+        <DeleteModal
+          deleteFn={() => deleteProgram(programId)}
+          isDeleting={isDeleting}
+          onCancel={closeDelete}
+          description="با حذف برنامه درمان، پرونده پزشکی، تمام جلسات (نوبت‌ها) و تکالیف مرتبط نیز برای همیشه حذف می‌شوند و قابل بازگشت نیست."
+        />
+      </Modal>
     </div>
   );
 };

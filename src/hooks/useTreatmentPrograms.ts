@@ -94,6 +94,27 @@ export function useCreateTreatmentProgram(onSuccess?: () => void) {
   });
 }
 
+export function useDeleteTreatmentProgram(onSuccess?: () => void) {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/treatment-programs/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.message || "خطا در حذف برنامه درمان");
+      }
+    },
+    onError(error) {
+      toast.error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("برنامه درمان حذف شد");
+      onSuccess?.();
+    },
+  });
+}
+
 export function useUpdateTreatmentProgram(onSuccess?: () => void) {
   return useMutation({
     mutationFn: async ({

@@ -38,3 +38,23 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   const data = adaptBackendResponse(await response.json().catch(() => ({})));
   return NextResponse.json(data, { status: response.status });
 }
+
+export async function DELETE(req: NextRequest, { params }: Ctx) {
+  const { id } = await params;
+  const token = req.cookies.get("token");
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}api/v1/treatment-programs/${id}`,
+    {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token?.value}`,
+      },
+    }
+  );
+  if (response.status === 204) {
+    return NextResponse.json({ message: "Deleted" }, { status: 200 });
+  }
+  const data = adaptBackendResponse(await response.json().catch(() => ({})));
+  return NextResponse.json(data, { status: response.status });
+}

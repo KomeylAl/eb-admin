@@ -3,7 +3,10 @@
 import { useCallback, useState } from "react";
 import Header from "@/components/layout/Header";
 import WithRole from "../_components/WithRole";
-import { useTreatmentPrograms } from "@/hooks/useTreatmentPrograms";
+import {
+  useDeleteTreatmentProgram,
+  useTreatmentPrograms,
+} from "@/hooks/useTreatmentPrograms";
 import { debounce } from "lodash";
 import { PuffLoader } from "react-spinners";
 import Table from "@/components/common/Table";
@@ -12,12 +15,19 @@ import { Combobox } from "@/components/ui/custom/Combobox";
 import { treatmentProgramStatusOptions } from "@/lib/selectOptions";
 import DoctorCombobox from "@/components/ui/custom/DoctorCombobox";
 import { Label } from "@/components/ui/label";
+import { useModal } from "@/hooks/useModal";
+import { Modal } from "@/components/common/Modal";
+import DeleteModal from "@/components/common/DeleteModal";
+import { useRouter } from "next/navigation";
+
 const TreatmentProgramsPage = () => {
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [doctorId, setDoctorId] = useState("");
+  const [deleteId, setDeleteId] = useState("");
 
   const { data, isLoading, error, refetch } = useTreatmentPrograms({
     page,
@@ -26,6 +36,18 @@ const TreatmentProgramsPage = () => {
     status,
     doctorId,
   });
+
+  const {
+    isOpen: deleteOpen,
+    openModal: openDelete,
+    closeModal: closeDelete,
+  } = useModal();
+
+  const { mutate: deleteProgram, isPending: isDeleting } =
+    useDeleteTreatmentProgram(() => {
+      closeDelete();
+      refetch();
+    });
 
   const debouncedSearch = useCallback(
     debounce(() => {
@@ -89,11 +111,33 @@ const TreatmentProgramsPage = () => {
                 pageSize={data.meta?.per_page ?? pageSize}
                 totalItems={data.meta?.total ?? 0}
                 onPageChange={setPage}
+                showActions
+                onEdit={(item: any) =>
+                  router.push(`/admin-dashboard/treatment-programs/${item.id}`)
+                }
+                onDelete={(item: any) => {
+                  setDeleteId(String(item.id));
+                  openDelete();
+                }}
               />
             )}
           </div>
         </div>
       </WithRole>
+
+      <Modal
+        showCloseButton={false}
+        isOpen={deleteOpen}
+        onClose={closeDelete}
+        className="max-w-[700px] bg-white"
+      >
+        <DeleteModal
+          deleteFn={() => deleteProgram(deleteId)}
+          isDeleting={isDeleting}
+          onCancel={closeDelete}
+          description="با حذف برنامه درمان، پرونده پزشکی، تمام جلسات (نوبت‌ها) و تکالیف مرتبط نیز برای همیشه حذف می‌شوند و قابل بازگشت نیست."
+        />
+      </Modal>
     </div>
   );
 };
