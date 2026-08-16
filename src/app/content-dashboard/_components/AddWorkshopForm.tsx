@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { convertBaseDate } from "@/lib/utils";
 import RichTextEditor from "@/components/common/rich-text-editor";
+import MediaPicker from "@/components/common/MediaPicker";
 
 export default function AddWorkshopForm({
   onCloseModal,
@@ -33,6 +34,7 @@ export default function AddWorkshopForm({
   const [startDate, setStartDate] = useState<any>(null);
   const [endDate, setEndDate] = useState<any>(null);
   const [content, setContent] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const onSubmit = (data: any) => {
     addWorkshop(data);
@@ -151,15 +153,16 @@ export default function AddWorkshopForm({
 
       <div className="w-full">
         <label>تصویر</label>
-        <Input
-          type="file"
-          accept="image/*"
-          {...register("image")}
-          className="w-full bg-white py-2 rounded-md  px-2 mt-2"
-        />
-        {errors.image && (
-          <p className="text-red-500 text-sm">{errors.image.message}</p>
-        )}
+        <div className="mt-2">
+          <MediaPicker
+            collection="workshops"
+            previewUrl={imagePreview}
+            onChange={(media) => {
+              setValue("image_media_id", media?.id ?? null);
+              setImagePreview(media?.url ?? null);
+            }}
+          />
+        </div>
       </div>
 
       <div className="flex justify-end gap-3 mt-5">

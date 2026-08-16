@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { appendMediaRef } from "@/lib/mediaForm";
 
 export function useAbout() {
   return useQuery({
@@ -27,11 +27,14 @@ export function useUpdateAbout() {
       newData.append("address", formData.address);
       newData.append("phones", formData.phones);
       newData.append("mobile_phones", formData.mobile_numbers);
-      newData.append("lat", formData.lat);
-      newData.append("long", formData.long);
-      if (formData.image) {
-        newData.append("image", formData.image);
-      }
+      newData.append("latitude", formData.lat ?? formData.latitude ?? "");
+      newData.append("longitude", formData.long ?? formData.longitude ?? "");
+      appendMediaRef(
+        newData,
+        "logo",
+        "logo_media_id",
+        formData.logo_media_id || formData.image
+      );
 
       console.log(newData)
 

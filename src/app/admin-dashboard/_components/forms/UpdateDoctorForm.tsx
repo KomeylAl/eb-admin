@@ -11,11 +11,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { doctorSchema } from "@/validations";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { MultiCombobox } from "@/components/ui/custom/MultiCombobox";
 import { EntityType } from "@/lib/types";
 import axios from "axios";
 import toast from "react-hot-toast";
+import MediaPicker from "@/components/common/MediaPicker";
 
 interface UpdateDoctorFormProps {
   doctor: any;
@@ -66,7 +66,6 @@ const UpdateDoctorForm = ({
     register,
     handleSubmit,
     setValue,
-    watch,
     control,
     formState: { errors },
   } = useForm({
@@ -84,20 +83,10 @@ const UpdateDoctorForm = ({
         item.id.toString()
       ),
       avatar: null,
+      avatar_media_id: null,
       resume: null,
     },
   });
-
-  const watchImage: any = watch("avatar");
-
-  useEffect(() => {
-    if (watchImage && watchImage.length > 0) {
-      const file = watchImage[0];
-      setImagePreview(URL.createObjectURL(file));
-    } else {
-      setImagePreview(avatarSrc || null);
-    }
-  }, [watchImage, avatarSrc]);
 
   const onSubmit = (data: any) => {
     // console.log(data);
@@ -250,28 +239,17 @@ const UpdateDoctorForm = ({
       <div className="w-full flex items-start gap-4">
         <div className="w-full">
           <label>آواتار</label>
-          <Input
-            type="file"
-            accept="image/*"
-            {...register("avatar")}
-            className="w-full bg-white py-2 rounded-md  px-2 mt-2"
-          />
-          {errors.avatar && (
-            <p className="text-red-500 text-sm">{errors.avatar.message}</p>
-          )}
-          {imagePreview && (
-            <div className="mt-3">
-              {/* unoptimized: Laravel storage URLs fail via /_next/image optimizer (400) */}
-              <Image
-                src={imagePreview}
-                alt="Avatar Preview"
-                width={200}
-                height={200}
-                unoptimized
-                className="rounded-md object-cover"
-              />
-            </div>
-          )}        </div>
+          <div className="mt-2">
+            <MediaPicker
+              collection="doctor_avatars"
+              previewUrl={imagePreview}
+              onChange={(media) => {
+                setValue("avatar_media_id", media?.id ?? null);
+                setImagePreview(media?.url ?? null);
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="flex justify-end gap-3 mt-5">

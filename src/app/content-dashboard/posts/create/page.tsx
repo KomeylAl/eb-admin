@@ -1,6 +1,7 @@
 "use client";
 
 import RichTextEditor from "@/components/common/rich-text-editor";
+import MediaPicker from "@/components/common/MediaPicker";
 import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/custom/Combobox";
@@ -70,12 +71,14 @@ const CreatePost = () => {
     handleSubmit,
     setValue,
     control,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(postSchema),
   });
 
   const [content, setContent] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const onSubmit = (data: any) => {
     addPost(data);
@@ -223,17 +226,17 @@ const CreatePost = () => {
 
         <div>
           <label>تصویر شاخص</label>
-          <Input
-            type="file"
-            accept="image/*"
-            {...register("thumbnail")}
-            className="mt-2"
-          />
-          {errors.thumbnail && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors.thumbnail.message}
-            </p>
-          )}
+          <div className="mt-2">
+            <MediaPicker
+              collection="posts"
+              valueId={watch("thumbnail_media_id") as string | undefined}
+              previewUrl={imagePreview}
+              onChange={(media) => {
+                setValue("thumbnail_media_id", media?.id ?? null);
+                setImagePreview(media?.url ?? null);
+              }}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 py-6">

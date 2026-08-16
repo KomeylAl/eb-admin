@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -10,6 +10,7 @@ import { useAbout, useUpdateAbout } from "@/hooks/useAbout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/layout/Header";
+import MediaPicker from "@/components/common/MediaPicker";
 
 // 👇🏻 ولیدیشن
 const schema = yup.object().shape({
@@ -20,12 +21,7 @@ const schema = yup.object().shape({
   mobile_numbers: yup.string().required("شماره همراه الزامی است"),
   lat: yup.string(),
   long: yup.string(),
-  image: yup
-    .mixed()
-    .nullable()
-    .test("fileSize", "حجم تصویر نباید بیشتر از 5MB باشد", (value: any) =>
-      value ? value.size <= 5 * 1024 * 1024 : true
-    ),
+  logo_media_id: yup.string().nullable(),
 });
 
 const About = () => {
@@ -49,24 +45,27 @@ const About = () => {
       phones: "",
       lat: "",
       long: "",
-      image: null,
+      logo_media_id: null,
     },
   });
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // وقتی دیتا اومد، فرم رو پر کن
   useEffect(() => {
     if (data) {
-      console.log(data);
+      const about = data.data ?? data;
       reset({
-        title: data?.title ?? "",
-        about: data?.about ?? "",
-        address: data?.address ?? "",
-        phones: data?.phones ?? "",
-        mobile_numbers: data?.mobile_phones ?? "",
-        lat: data?.lat ?? "",
-        long: data?.long ?? "",
-        image: null,
+        title: about?.title ?? "",
+        about: about?.about ?? "",
+        address: about?.address ?? "",
+        phones: about?.phones ?? "",
+        mobile_numbers: about?.mobile_phones ?? "",
+        lat: about?.latitude ?? about?.lat ?? "",
+        long: about?.longitude ?? about?.long ?? "",
+        logo_media_id: null,
       });
+      setLogoPreview(about?.logo_url || about?.logo || null);
     }
   }, [data, reset]);
 
@@ -168,23 +167,14 @@ const About = () => {
           <div className="w-full flex flex-col lg:flex-row gap-4">
             <div className="w-full flex flex-col gap-3">
               <h2>تصویر لوگو</h2>
-              <Controller
-                name="image"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    type="file"
-                    accept="image/png, image/jpeg, image/webp"
-                    onChange={(e) =>
-                      setValue("image", e.target.files?.[0] ?? null)
-                    }
-                    className="w-full bg-white"
-                  />
-                )}
+              <MediaPicker
+                collection="about"
+                previewUrl={logoPreview}
+                onChange={(media) => {
+                  setValue("logo_media_id", media?.id ?? null);
+                  setLogoPreview(media?.url ?? null);
+                }}
               />
-              {errors.image && (
-                <p className="text-red-500 text-sm">{errors.image.message}</p>
-              )}
             </div>
             <div className="w-full flex flex-col gap-3">
               <h2>طول جغرافیایی</h2>

@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { appendMediaRef } from "@/lib/mediaForm";
 
 export function usePosts(
   page: number = 0,
@@ -71,9 +72,12 @@ export function useStorePost(onSuccess: () => void) {
         newData.append("tag_ids[]", id.toString());
       });
 
-      if (formData.thumbnail && formData.thumbnail.length > 0) {
-        newData.append("thumbnail", formData.thumbnail[0]);
-      }
+      appendMediaRef(
+        newData,
+        "thumbnail",
+        "thumbnail_media_id",
+        formData.thumbnail_media_id || formData.thumbnail
+      );
 
       const res = await fetch("/api/posts", {
         method: "POST",
@@ -116,9 +120,12 @@ export function useUpdatePost(slug: string, onSuccess: () => void) {
         newData.append("tag_ids[]", id.toString());
       });
 
-      if (formData.thumbnail && formData.thumbnail.length > 0) {
-        newData.append("thumbnail", formData.thumbnail[0]);
-      }
+      appendMediaRef(
+        newData,
+        "thumbnail",
+        "thumbnail_media_id",
+        formData.thumbnail_media_id || formData.thumbnail
+      );
 
       const res = await fetch(`/api/posts/${slug}`, {
         method: "POST",

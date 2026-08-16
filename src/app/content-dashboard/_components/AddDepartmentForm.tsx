@@ -1,6 +1,7 @@
 "use client";
 
 import RichTextEditor from "@/components/common/rich-text-editor";
+import MediaPicker from "@/components/common/MediaPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +24,7 @@ const AddDepartmentForm = ({ onCloseModal }: { onCloseModal: () => void }) => {
   });
 
   const [content, setContent] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const onSubmit = (data: any) => {
     addDepartment(data);
@@ -81,15 +83,16 @@ const AddDepartmentForm = ({ onCloseModal }: { onCloseModal: () => void }) => {
 
       <div className="w-full">
         <label>تصویر</label>
-        <Input
-          type="file"
-          accept="image/*"
-          {...register("thumbnail")}
-          className="w-full bg-white py-2 rounded-md  px-2 mt-2"
-        />
-        {errors.thumbnail && (
-          <p className="text-red-500 text-sm">{errors.thumbnail.message}</p>
-        )}
+        <div className="mt-2">
+          <MediaPicker
+            collection="departments"
+            previewUrl={imagePreview}
+            onChange={(media) => {
+              setValue("thumbnail_media_id", media?.id ?? null);
+              setImagePreview(media?.url ?? null);
+            }}
+          />
+        </div>
       </div>
 
       <div className="flex justify-end gap-3 mt-5">

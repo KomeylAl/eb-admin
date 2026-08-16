@@ -6,4 +6,5 @@ export const tagSchema = yup.object().shape({
   content: yup.string().required("محتوا الزامی است"),
   excerpt: yup.string().nullable(),
   image: yup.mixed().nullable(),
+  image_media_id: yup.string().nullable(),
 });

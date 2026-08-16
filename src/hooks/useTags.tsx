@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { appendMediaRef } from "@/lib/mediaForm";
 
 export function useTags(
   page: number = 0,
@@ -50,9 +51,12 @@ export function useStoreTag(onSuccess: () => void) {
       newData.append("excerpt", formData.excerpt);
       newData.append("content", formData.content);
 
-      if (formData.image && formData.image.length > 0) {
-        newData.append("image", formData.image[0]);
-      }
+      appendMediaRef(
+        newData,
+        "image",
+        "image_media_id",
+        formData.image_media_id || formData.image
+      );
 
       const res = await fetch("/api/tags", {
         method: "POST",
@@ -86,9 +90,12 @@ export function useUpdateTag(tagId: string, onSuccess: () => void) {
       newData.append("excerpt", formData.excerpt);
       newData.append("content", formData.content);
 
-      if (formData.image && formData.image.length > 0) {
-        newData.append("image", formData.image[0]);
-      }
+      appendMediaRef(
+        newData,
+        "image",
+        "image_media_id",
+        formData.image_media_id || formData.image
+      );
 
       const res = await fetch(`/api/tags/${tagId}`, {
         method: "POST",

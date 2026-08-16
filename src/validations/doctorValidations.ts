@@ -11,5 +11,6 @@ export const doctorSchema = yup.object().shape({
   days: yup.string().nullable(),
   department_ids: yup.array().nullable(),
   avatar: yup.mixed().nullable(),
+  avatar_media_id: yup.string().nullable(),
   resume: yup.mixed().nullable(),
 });

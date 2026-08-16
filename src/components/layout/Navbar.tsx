@@ -13,6 +13,7 @@ import {
   FileText,
   FolderHeart,
   GraduationCap,
+  Images,
   Info,
   LayoutDashboard,
   LayoutGrid,
@@ -188,6 +189,12 @@ const sections: NavSection[] = [
         access: ["author"],
         icon: Info,
       },
+      {
+        title: "رسانه و فایل‌ها",
+        link: "/content-dashboard/media",
+        access: ["author"],
+        icon: Images,
+      },
     ],
   },
   {
@@ -206,6 +213,12 @@ const sections: NavSection[] = [
     id: "system",
     title: "سیستم",
     items: [
+      {
+        title: "رسانه و فایل‌ها",
+        link: "/admin-dashboard/media",
+        access: ["manager", "boss"],
+        icon: Images,
+      },
       {
         title: "مدیران سایت",
         link: "/admin-dashboard/admins",

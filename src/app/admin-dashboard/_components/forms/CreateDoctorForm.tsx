@@ -15,6 +15,7 @@ import { EntityType } from "@/lib/types";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { MultiCombobox } from "@/components/ui/custom/MultiCombobox";
+import MediaPicker from "@/components/common/MediaPicker";
 
 interface CreateDoctorFormProps {
   onDoctorAdded: () => void;
@@ -52,6 +53,8 @@ const CreateDoctorForm = ({ onDoctorAdded, onCloseModal }: CreateDoctorFormProps
   } = useForm({
     resolver: yupResolver(doctorSchema),
   });
+
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const onSubmit = (data: any) => {
     addDoctor(data);
@@ -202,15 +205,16 @@ const CreateDoctorForm = ({ onDoctorAdded, onCloseModal }: CreateDoctorFormProps
       <div className="w-full flex items-center gap-4">
         <div className="w-full">
           <label>آواتار</label>
-          <Input
-            type="file"
-            accept="image/*"
-            {...register("avatar")}
-            className="w-full bg-white py-2 rounded-md  px-2 mt-2"
-          />
-          {errors.avatar && (
-            <p className="text-red-500 text-sm">{errors.avatar.message}</p>
-          )}
+          <div className="mt-2">
+            <MediaPicker
+              collection="doctor_avatars"
+              previewUrl={avatarPreview}
+              onChange={(media) => {
+                setValue("avatar_media_id", media?.id ?? null);
+                setAvatarPreview(media?.url ?? null);
+              }}
+            />
+          </div>
         </div>
         <div className="w-full">
           <label>رزومه</label>

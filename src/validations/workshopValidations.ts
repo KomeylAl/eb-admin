@@ -27,6 +27,7 @@ export const workshopSchema = yup.object().shape({
   week_day: yup.string().nullable(),
   time: yup.string().nullable(),
   image: yup.mixed().nullable(),
+  image_media_id: yup.string().nullable(),
 });
 
 export const workshopSessionSchema = yup.object().shape({

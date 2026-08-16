@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { appendMediaRef } from "@/lib/mediaForm";
 
 export function useWorksops(
   page: number = 0,
@@ -49,9 +50,12 @@ export function useAddWorkshop(onSuccess: () => void) {
       newData.append("start_date", formData.start_date);
       newData.append("end_date", formData.end_date);
 
-      if (formData.image && formData.image.length > 0) {
-        newData.append("image", formData.image[0]);
-      }
+      appendMediaRef(
+        newData,
+        "image",
+        "image_media_id",
+        formData.image_media_id || formData.image
+      );
 
       const res = await fetch("/api/workshops/", {
         method: "POST",
@@ -90,9 +94,12 @@ export function useUpdateWorkshop(id: string, onSuccess: () => void) {
       newData.append("start_date", data.start_date);
       newData.append("end_date", data.end_date);
 
-      if (data.image && data.image.length > 0) {
-        newData.append("image", data.image[0]);
-      }
+      appendMediaRef(
+        newData,
+        "image",
+        "image_media_id",
+        data.image_media_id || data.image
+      );
 
       const res = await fetch(`/api/workshops/${id}`, {
         method: "POST",

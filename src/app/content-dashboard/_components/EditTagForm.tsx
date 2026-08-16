@@ -1,14 +1,14 @@
 "use client";
 
 import RichTextEditor from "@/components/common/rich-text-editor";
+import MediaPicker from "@/components/common/MediaPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateTag } from "@/hooks/useTags";
 import { tagSchema } from "@/validations";
 import { yupResolver } from "@hookform/resolvers/yup";
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 
 const EditTagForm = ({
@@ -29,7 +29,6 @@ const EditTagForm = ({
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(tagSchema),
@@ -39,20 +38,9 @@ const EditTagForm = ({
       excerpt: tag.excerpt,
       content: tag.content,
       image: null,
+      image_media_id: null,
     },
   });
-
-  // Watch for file input changes to show preview
-  const watchImage: any = watch("image");
-
-  useEffect(() => {
-    if (watchImage && watchImage.length > 0) {
-      const file = watchImage[0];
-      setImagePreview(URL.createObjectURL(file));
-    } else {
-      setImagePreview(tag.image || null);
-    }
-  }, [watchImage, tag.image]);
 
   const onSubmit = (data: any) => {
     updateTag(data);
@@ -111,27 +99,16 @@ const EditTagForm = ({
 
       <div className="w-full">
         <label>تصویر</label>
-        <Input
-          type="file"
-          accept="image/*"
-          {...register("image")}
-          className="w-full bg-white py-2 rounded-md  px-2 mt-2"
-        />
-        {errors.image && (
-          <p className="text-red-500 text-sm">{errors.image.message}</p>
-        )}
-        {imagePreview && (
-          <div className="mt-3">
-            <Image
-              src={imagePreview}
-              alt="Category Preview"
-              width={200}
-              height={200}
-              unoptimized
-              className="rounded-md object-cover"
-            />
-          </div>
-        )}
+        <div className="mt-2">
+          <MediaPicker
+            collection="tags"
+            previewUrl={imagePreview || tag.image_url || tag.image}
+            onChange={(media) => {
+              setValue("image_media_id", media?.id ?? null);
+              setImagePreview(media?.url ?? null);
+            }}
+          />
+        </div>
       </div>
 
       <div className="flex justify-end gap-3 mt-5">

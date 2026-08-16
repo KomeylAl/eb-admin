@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { appendMediaRef } from "@/lib/mediaForm";
 
 export function useDepartments(
   page: number = 0,
@@ -50,9 +51,12 @@ export function useStoreDepartment(onSuccess: () => void) {
       newData.append("excerpt", formData.excerpt);
       newData.append("content", formData.content);
 
-      if (formData.thumbnail && formData.thumbnail.length > 0) {
-        newData.append("thumbnail", formData.thumbnail[0]);
-      }
+      appendMediaRef(
+        newData,
+        "thumbnail",
+        "thumbnail_media_id",
+        formData.thumbnail_media_id || formData.thumbnail
+      );
 
       const res = await fetch("/api/departments", {
         method: "POST",
@@ -87,9 +91,12 @@ export function useUpdateDepartment(slug: string, onSuccess: () => void) {
       newData.append("excerpt", formData.excerpt);
       newData.append("content", formData.content);
 
-      if (formData.thumbnail && formData.thumbnail.length > 0) {
-        newData.append("thumbnail", formData.thumbnail[0]);
-      }
+      appendMediaRef(
+        newData,
+        "thumbnail",
+        "thumbnail_media_id",
+        formData.thumbnail_media_id || formData.thumbnail
+      );
 
       const res = await fetch(`/api/departments/${slug}`, {
         method: "POST",

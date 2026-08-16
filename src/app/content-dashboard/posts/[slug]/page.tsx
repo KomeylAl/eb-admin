@@ -3,6 +3,7 @@
 import DeleteModal from "@/components/common/DeleteModal";
 import { Modal } from "@/components/common/Modal";
 import RichTextEditor from "@/components/common/rich-text-editor";
+import MediaPicker from "@/components/common/MediaPicker";
 import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/custom/Combobox";
@@ -22,7 +23,6 @@ import { EntityType } from "@/lib/types";
 import { postSchema } from "@/validations";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -114,19 +114,11 @@ const Post = ({ params }: PageProps) => {
         published_at: post.data.published_at,
         tag_ids: post.data.tags.map((tag: any) => tag.id.toString()),
         thumbnail: null,
+        thumbnail_media_id: null,
       });
+      setImagePreview(post.data.thumbnail_url || post.data.thumbnail || null);
     }
   }, [post, reset]);
-
-  const watchImage: any = watch("thumbnail");
-  useEffect(() => {
-    if (watchImage && watchImage.length > 0) {
-      const file = watchImage[0];
-      setImagePreview(URL.createObjectURL(file));
-    } else {
-      setImagePreview(post?.data.thumbnail || null);
-    }
-  }, [watchImage, post?.data.thumbnail]);
 
   const onSubmit = (data: any) => {
     updatePost(data);
@@ -290,29 +282,17 @@ const Post = ({ params }: PageProps) => {
 
           <div>
             <label>تصویر شاخص</label>
-            <Input
-              type="file"
-              accept="image/*"
-              {...register("thumbnail")}
-              className="mt-2"
-            />
-            {errors.thumbnail && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.thumbnail.message}
-              </p>
-            )}
-            {imagePreview && (
-              <div className="mt-3">
-                <Image
-                  src={imagePreview}
-                  alt="Post Preview"
-                  width={200}
-                  height={200}
-                  unoptimized
-                  className="rounded-md object-cover"
-                />
-              </div>
-            )}
+            <div className="mt-2">
+              <MediaPicker
+                collection="posts"
+                valueId={watch("thumbnail_media_id") as string | undefined}
+                previewUrl={imagePreview}
+                onChange={(media) => {
+                  setValue("thumbnail_media_id", media?.id ?? null);
+                  setImagePreview(media?.url ?? null);
+                }}
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 py-6">

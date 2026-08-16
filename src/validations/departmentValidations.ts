@@ -6,4 +6,5 @@ export const departmentSchema = yup.object().shape({
   content: yup.string().required("محتوا الزامی است"),
   excerpt: yup.string().nullable(),
   thumbnail: yup.mixed().nullable(),
+  thumbnail_media_id: yup.string().nullable(),
 });

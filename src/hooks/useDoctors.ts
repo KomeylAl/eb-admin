@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { appendMediaRef } from "@/lib/mediaForm";
 
 export function useDoctors(
   page: number = 0,
@@ -213,9 +214,12 @@ export function useAddDoctor(onDuccess: () => void) {
         });
       }
 
-      if (formData.avatar && formData.avatar.length > 0) {
-        newData.append("avatar", formData.avatar[0]);
-      }
+      appendMediaRef(
+        newData,
+        "avatar",
+        "avatar_media_id",
+        formData.avatar_media_id || formData.avatar
+      );
 
       if (formData.resume && formData.resume.length > 0) {
         newData.append("resume", formData.resume[0]);
@@ -260,9 +264,12 @@ export function useEditDoctor(doctorId: number, onSuccess: () => void) {
         newData.append("department_ids[]", id.toString());
       });
 
-      if (formData.avatar && formData.avatar.length > 0) {
-        newData.append("avatar", formData.avatar[0]);
-      }
+      appendMediaRef(
+        newData,
+        "avatar",
+        "avatar_media_id",
+        formData.avatar_media_id || formData.avatar
+      );
 
       if (formData.resume && formData.resume.length > 0) {
         newData.append("resume", formData.resume[0]);

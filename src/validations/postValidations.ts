@@ -10,4 +10,5 @@ export const postSchema = yup.object().shape({
   category_id: yup.string().required("دسته بندی الزامی است"),
   tag_ids: yup.array().nullable(),
   thumbnail: yup.mixed().nullable(),
+  thumbnail_media_id: yup.string().nullable(),
 });
