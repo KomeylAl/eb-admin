@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import type { MediaCollection, MediaFolder, MediaItem } from "@/lib/media";
+import { prepareImageUpload } from "@/lib/media";
 
 type MediaListParams = {
   page?: number;
@@ -90,7 +91,7 @@ export function useUploadMedia() {
       folderId?: string | null;
     }) => {
       const body = new FormData();
-      body.append("file", input.file);
+      body.append("file", await prepareImageUpload(input.file));
       body.append("collection", input.collection);
       if (input.name) body.append("name", input.name);
       if (input.folderId) body.append("folder_id", input.folderId);
