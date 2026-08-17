@@ -108,7 +108,7 @@ const EditCategoryForm = ({
             collection="categories"
             previewUrl={imagePreview || category.image_url || category.image}
             onChange={(media) => {
-              setValue("image_media_id", media?.id ?? null);
+              setValue("image_media_id", media?.id ?? null, { shouldDirty: true, shouldValidate: true });
               setImagePreview(media?.url ?? null);
             }}
           />

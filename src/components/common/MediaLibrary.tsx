@@ -68,6 +68,11 @@ export default function MediaLibrary() {
             <input
               type="file"
               className="hidden"
+              accept={
+                collectionOptions.find((item) => item.key === collection)?.extensions
+                  ?.map((ext) => `.${ext}`)
+                  .join(",") || "image/*,application/pdf"
+              }
               onChange={(event) => {
                 const file = event.target.files?.[0];
                 if (!file) return;
@@ -83,9 +88,9 @@ export default function MediaLibrary() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
-          <aside className="space-y-4 rounded-xl border bg-white p-4 dark:border-gray-800 dark:bg-gray-950">
-            <div>
-              <p className="mb-2 text-xs font-semibold text-gray-500">پوشه‌ها</p>
+          <aside className="flex max-h-[28rem] flex-col overflow-hidden rounded-xl border bg-white p-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-7rem)] lg:self-start dark:border-gray-800 dark:bg-gray-950">
+            <p className="mb-2 shrink-0 text-xs font-semibold text-gray-500">پوشه‌ها</p>
+            <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pe-1">
               <button
                 type="button"
                 onClick={() => setFolderId(null)}
@@ -122,7 +127,7 @@ export default function MediaLibrary() {
                 </div>
               ))}
             </div>
-            <div className="flex gap-2">
+            <div className="mt-3 flex shrink-0 gap-2 border-t pt-3 dark:border-gray-800">
               <Input
                 value={folderName}
                 onChange={(event) => setFolderName(event.target.value)}

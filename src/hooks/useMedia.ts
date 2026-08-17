@@ -22,6 +22,19 @@ function buildMediaQuery(params: MediaListParams) {
   return query.toString();
 }
 
+function mediaErrorMessage(payload: any, fallback: string) {
+  const fieldErrors = payload?.errors ?? payload?.details?.errors;
+  if (fieldErrors && typeof fieldErrors === "object") {
+    const first = Object.values(fieldErrors).flat().find((item) => typeof item === "string");
+    if (typeof first === "string" && first.trim()) return first;
+  }
+
+  const message = payload?.message ?? payload?.details?.message;
+  if (typeof message === "string" && message.trim()) return message;
+
+  return fallback;
+}
+
 export function useMediaList(params: MediaListParams) {
   const qs = buildMediaQuery(params);
 
@@ -85,9 +98,13 @@ export function useUploadMedia() {
       const res = await fetch("/api/media", { method: "POST", body });
       const payload = await res.json();
       if (!res.ok) {
-        throw new Error(payload?.message || payload?.details?.message || "خطا در آپلود فایل");
+        throw new Error(mediaErrorMessage(payload, "خطا در آپلود فایل"));
       }
-      return (payload?.data ?? payload) as MediaItem;
+      const media = (payload?.data?.data ?? payload?.data ?? payload) as MediaItem;
+      if (!media?.id) {
+        throw new Error("پاسخ آپلود نامعتبر بود");
+      }
+      return media;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media"] });

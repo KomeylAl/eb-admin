@@ -232,7 +232,7 @@ const CreatePost = () => {
               valueId={watch("thumbnail_media_id") as string | undefined}
               previewUrl={imagePreview}
               onChange={(media) => {
-                setValue("thumbnail_media_id", media?.id ?? null);
+                setValue("thumbnail_media_id", media?.id ?? null, { shouldDirty: true, shouldValidate: true });
                 setImagePreview(media?.url ?? null);
               }}
             />

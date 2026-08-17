@@ -178,7 +178,7 @@ export default function EditWorkshopForm({
             collection="workshops"
             previewUrl={imagePreview || workshop.image_url || workshop.img_path}
             onChange={(media) => {
-              setValue("image_media_id", media?.id ?? null);
+              setValue("image_media_id", media?.id ?? null, { shouldDirty: true, shouldValidate: true });
               setImagePreview(media?.url ?? null);
             }}
           />

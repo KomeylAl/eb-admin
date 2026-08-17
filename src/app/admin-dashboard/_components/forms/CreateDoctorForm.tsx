@@ -210,10 +210,14 @@ const CreateDoctorForm = ({ onDoctorAdded, onCloseModal }: CreateDoctorFormProps
               collection="doctor_avatars"
               previewUrl={avatarPreview}
               onChange={(media) => {
-                setValue("avatar_media_id", media?.id ?? null);
+                setValue("avatar_media_id", media?.id ?? null, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
                 setAvatarPreview(media?.url ?? null);
               }}
             />
+            <input type="hidden" {...register("avatar_media_id")} />
           </div>
         </div>
         <div className="w-full">

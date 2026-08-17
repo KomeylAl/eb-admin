@@ -88,7 +88,7 @@ const AddCategoryForm = ({ onCloseModal }: { onCloseModal: () => void }) => {
             collection="categories"
             previewUrl={imagePreview}
             onChange={(media) => {
-              setValue("image_media_id", media?.id ?? null);
+              setValue("image_media_id", media?.id ?? null, { shouldDirty: true, shouldValidate: true });
               setImagePreview(media?.url ?? null);
             }}
           />

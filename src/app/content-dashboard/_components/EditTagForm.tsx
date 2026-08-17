@@ -104,7 +104,7 @@ const EditTagForm = ({
             collection="tags"
             previewUrl={imagePreview || tag.image_url || tag.image}
             onChange={(media) => {
-              setValue("image_media_id", media?.id ?? null);
+              setValue("image_media_id", media?.id ?? null, { shouldDirty: true, shouldValidate: true });
               setImagePreview(media?.url ?? null);
             }}
           />

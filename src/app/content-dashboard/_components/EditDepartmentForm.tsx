@@ -107,7 +107,7 @@ const EditDepartmentForm = ({
             collection="departments"
             previewUrl={imagePreview || department.thumbnail_url || department.thumbnail}
             onChange={(media) => {
-              setValue("thumbnail_media_id", media?.id ?? null);
+              setValue("thumbnail_media_id", media?.id ?? null, { shouldDirty: true, shouldValidate: true });
               setImagePreview(media?.url ?? null);
             }}
           />

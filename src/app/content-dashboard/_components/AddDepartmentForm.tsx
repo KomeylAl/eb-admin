@@ -88,7 +88,7 @@ const AddDepartmentForm = ({ onCloseModal }: { onCloseModal: () => void }) => {
             collection="departments"
             previewUrl={imagePreview}
             onChange={(media) => {
-              setValue("thumbnail_media_id", media?.id ?? null);
+              setValue("thumbnail_media_id", media?.id ?? null, { shouldDirty: true, shouldValidate: true });
               setImagePreview(media?.url ?? null);
             }}
           />

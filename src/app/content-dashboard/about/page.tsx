@@ -171,7 +171,7 @@ const About = () => {
                 collection="about"
                 previewUrl={logoPreview}
                 onChange={(media) => {
-                  setValue("logo_media_id", media?.id ?? null);
+                  setValue("logo_media_id", media?.id ?? null, { shouldDirty: true, shouldValidate: true });
                   setLogoPreview(media?.url ?? null);
                 }}
               />

@@ -28,6 +28,17 @@ type MediaPickerProps = {
   disabled?: boolean;
 };
 
+function unwrapMedia(payload: unknown): MediaItem | null {
+  if (!payload || typeof payload !== "object") return null;
+  const root = payload as Record<string, unknown>;
+  if (typeof root.id === "string") return root as unknown as MediaItem;
+  if (root.data && typeof root.data === "object") {
+    const nested = root.data as Record<string, unknown>;
+    if (typeof nested.id === "string") return nested as unknown as MediaItem;
+  }
+  return null;
+}
+
 export default function MediaPicker({
   collection,
   valueId,
@@ -43,11 +54,11 @@ export default function MediaPicker({
   const [customName, setCustomName] = useState("");
   const [localPreview, setLocalPreview] = useState<string | null>(null);
 
+  // Gallery shows all library images so files uploaded under "library" can be reused.
   const { data, isLoading } = useMediaList({
     page: 1,
     perPage: 24,
     search,
-    collection,
     mime: accept.startsWith("image") ? "image" : undefined,
   });
   const upload = useUploadMedia();
@@ -68,14 +79,22 @@ export default function MediaPicker({
 
   const handleUpload = async () => {
     if (!file) return;
-    const media = await upload.mutateAsync({
-      file,
-      collection,
-      name: customName || undefined,
-    });
-    onChange(media);
-    setOpen(false);
-    handleFile(null);
+    try {
+      const uploaded = await upload.mutateAsync({
+        file,
+        collection,
+        name: customName || undefined,
+      });
+      const media = unwrapMedia(uploaded);
+      if (!media?.id) {
+        return;
+      }
+      onChange(media);
+      setOpen(false);
+      handleFile(null);
+    } catch {
+      // Toast is handled by the mutation.
+    }
   };
 
   return (
@@ -85,37 +104,32 @@ export default function MediaPicker({
           type="button"
           disabled={disabled}
           onClick={() => setOpen(true)}
-          className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-blue-500 bg-gray-50 text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-900"
+          className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-blue-500 bg-blue-50/40 text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-950/20"
         >
           {displayUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={displayUrl} alt="" className="h-full w-full object-cover" />
           ) : (
-            <span className="flex flex-col items-center gap-1 text-xs">
+            <span className="flex flex-col items-center gap-1 px-2 text-xs">
               <ImagePlus className="size-6" />
               {label}
             </span>
           )}
         </button>
-        <div className="space-y-2">
-          <Button type="button" variant="outline" disabled={disabled} onClick={() => setOpen(true)}>
-            انتخاب از گالری یا آپلود
+        {(valueId || previewUrl || localPreview) && (
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-rose-500"
+            disabled={disabled}
+            onClick={() => {
+              onChange(null);
+              setLocalPreview(null);
+            }}
+          >
+            حذف انتخاب
           </Button>
-          {valueId || previewUrl ? (
-            <Button
-              type="button"
-              variant="ghost"
-              className="text-rose-500"
-              disabled={disabled}
-              onClick={() => {
-                onChange(null);
-                setLocalPreview(null);
-              }}
-            >
-              حذف انتخاب
-            </Button>
-          ) : null}
-        </div>
+        )}
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -181,7 +195,7 @@ export default function MediaPicker({
               {isLoading ? (
                 <p className="py-10 text-center text-sm text-gray-500">در حال بارگذاری...</p>
               ) : items.length === 0 ? (
-                <p className="py-10 text-center text-sm text-gray-500">فایلی در این مجموعه نیست.</p>
+                <p className="py-10 text-center text-sm text-gray-500">فایلی در گالری نیست.</p>
               ) : (
                 <div className="grid max-h-[22rem] grid-cols-3 gap-3 overflow-y-auto sm:grid-cols-4">
                   {items.map((item) => (
