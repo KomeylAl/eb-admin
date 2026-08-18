@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
@@ -14,6 +14,8 @@ import { convertBaseDate, dateConvert } from "@/lib/utils";
 import { useUpdateWorkshop } from "@/hooks/useWorkshops";
 import RichTextEditor from "@/components/common/rich-text-editor";
 import MediaPicker from "@/components/common/MediaPicker";
+import { Combobox } from "@/components/ui/custom/Combobox";
+import { workshopTypeOptions } from "@/lib/selectOptions";
 
 export default function EditWorkshopForm({
   onCloseModal,
@@ -38,12 +40,14 @@ export default function EditWorkshopForm({
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(workshopSchema),
     defaultValues: {
       title: workshop.title,
       slug: workshop.slug,
+      type: workshop.type || "general",
       excerpt: workshop.excerpt,
       content: workshop.content,
       organizers: workshop.organizers,
@@ -66,6 +70,28 @@ export default function EditWorkshopForm({
       className="w-full h-full p-8 space-y-7"
     >
       <h2 className="text-xl font-semibold">ویرایش کارگاه</h2>
+
+      <div className="w-full">
+        <label>نوع</label>
+        <div className="mt-2">
+          <Controller
+            name="type"
+            control={control}
+            render={({ field }) => (
+              <Combobox
+                data={workshopTypeOptions}
+                placeholder="انتخاب نوع"
+                searchPlaceholder="جستجو..."
+                value={field.value ?? "general"}
+                onChange={(v) => field.onChange(String(v))}
+              />
+            )}
+          />
+        </div>
+        {errors.type && (
+          <p className="text-red-500 text-sm">{errors.type.message as string}</p>
+        )}
+      </div>
 
       <div className="w-full flex items-center gap-4">
         <div className="w-full">

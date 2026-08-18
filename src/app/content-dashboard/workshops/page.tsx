@@ -11,18 +11,23 @@ import { workshopColumns } from "@/lib/columns";
 import Header from "@/components/layout/Header";
 import EditWorkshopForm from "../_components/EditWorkshopForm";
 import AddWorkshopForm from "../_components/AddWorkshopForm";
+import { Combobox } from "@/components/ui/custom/Combobox";
+import { workshopTypeOptions } from "@/lib/selectOptions";
+import { Label } from "@/components/ui/label";
 
 const WorkShops = () => {
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
   const [search, setSearch] = useState("");
+  const [type, setType] = useState("");
   const [item, setItem] = useState();
   const [id, setId] = useState("");
 
   const { data, isLoading, error, refetch } = useWorksops(
     page,
     pageSize,
-    search
+    search,
+    type
   );
   const { mutate: deleteWorkshop, isPending } = useDeleteWorkshop(id, () => {
     closeDelete();
@@ -39,12 +44,19 @@ const WorkShops = () => {
     openModal: openEdit,
     closeModal: closeEdit,
   } = useModal();
+
   return (
     <div className="w-full h-full flex flex-col">
-      <Header searchFn={() => {}} isShowSearch />
+      <Header
+        searchFn={(e: any) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
+        isShowSearch
+      />
       <div className="w-full flex flex-col p-4 sm:p-6 md:p-8">
         <div className="w-full h-full space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="font-bold text-2xl">کلاس ها و کارگاه ها</h2>
             <div
               onClick={openModal}
@@ -52,6 +64,23 @@ const WorkShops = () => {
             >
               افزودن کارگاه
             </div>
+          </div>
+
+          <div className="max-w-sm space-y-2">
+            <Label>فیلتر نوع</Label>
+            <Combobox
+              data={[
+                { value: "", label: "همه انواع" },
+                ...workshopTypeOptions,
+              ]}
+              placeholder="نوع"
+              searchPlaceholder="جستجو..."
+              value={type}
+              onChange={(v) => {
+                setType(String(v));
+                setPage(1);
+              }}
+            />
           </div>
 
           <div className="w-full h-full flex items-center justify-center">
@@ -74,12 +103,12 @@ const WorkShops = () => {
                 onPageChange={(newPage) => {
                   setPage(newPage);
                 }}
-                onDelete={(item: any) => {
-                  setId(item.id);
+                onDelete={(row: any) => {
+                  setId(row.id);
                   openDelete();
                 }}
-                onEdit={(item: any) => {
-                  setItem(item);
+                onEdit={(row: any) => {
+                  setItem(row);
                   openEdit();
                 }}
               />

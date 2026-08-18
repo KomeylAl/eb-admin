@@ -8,6 +8,7 @@ import {
   convertPostStatus,
   convertRole,
   convertTreatmentProgramStatus,
+  convertWorkshopType,
   dateConvert,
   formatMoney,
   paymentMethodLabel,
@@ -335,12 +336,16 @@ export const assessmentsColumns = [
 
 export const workshopColumns = [
   { header: "عنوان", accessor: "title" },
+  {
+    header: "نوع",
+    accessor: (row: any) => convertWorkshopType(row.type),
+  },
   { header: "روز های برگزاری", accessor: "week_day" },
   { header: "زمان برگزاری", accessor: "time" },
   {
     header: "پنل کارگاه",
     accessor: (row: any) => (
-      <Link href={`/dashboard/workshops/${row.id}`}>
+      <Link href={`/content-dashboard/workshops/${row.id}`}>
         <MdInsertChart size={25} className="text-blue-500" />
       </Link>
     ),

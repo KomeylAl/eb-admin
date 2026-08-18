@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAddWorkshop } from "@/hooks/useWorkshops";
 import DatePicker from "react-multi-date-picker";
@@ -14,6 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { convertBaseDate } from "@/lib/utils";
 import RichTextEditor from "@/components/common/rich-text-editor";
 import MediaPicker from "@/components/common/MediaPicker";
+import { Combobox } from "@/components/ui/custom/Combobox";
+import { workshopTypeOptions } from "@/lib/selectOptions";
 
 export default function AddWorkshopForm({
   onCloseModal,
@@ -26,9 +28,13 @@ export default function AddWorkshopForm({
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(workshopSchema),
+    defaultValues: {
+      type: "general",
+    },
   });
 
   const [startDate, setStartDate] = useState<any>(null);
@@ -46,6 +52,28 @@ export default function AddWorkshopForm({
       className="w-full h-full p-8 space-y-7"
     >
       <h2 className="text-xl font-semibold">افزودن کارگاه</h2>
+
+      <div className="w-full">
+        <label>نوع</label>
+        <div className="mt-2">
+          <Controller
+            name="type"
+            control={control}
+            render={({ field }) => (
+              <Combobox
+                data={workshopTypeOptions}
+                placeholder="انتخاب نوع"
+                searchPlaceholder="جستجو..."
+                value={field.value ?? "general"}
+                onChange={(v) => field.onChange(String(v))}
+              />
+            )}
+          />
+        </div>
+        {errors.type && (
+          <p className="text-red-500 text-sm">{errors.type.message as string}</p>
+        )}
+      </div>
 
       <div className="w-full flex items-center gap-4">
         <div className="w-full">

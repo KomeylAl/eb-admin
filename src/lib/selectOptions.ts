@@ -12,6 +12,13 @@ export const treatmentProgramStatusOptions = [
   { value: "cancelled", label: "لغو شده" },
 ];
 
+export const workshopTypeOptions = [
+  { value: "general", label: "کارگاه عمومی" },
+  { value: "specialized", label: "کارگاه تخصصی" },
+  { value: "webinar", label: "وبینار" },
+  { value: "seminar", label: "سمینار" },
+];
+
 export const amountStatusOptions = [
   { value: "unpaid", label: "پرداخت نشده" },
   { value: "paid", label: "پرداخت شده" },

@@ -19,6 +19,7 @@ export const workshopParticipantSchema = yup.object().shape({
 export const workshopSchema = yup.object().shape({
   title: yup.string().required("عنوان الزامی است"),
   slug: yup.string().required("اسلاگ الزامی است"),
+  type: yup.string().required("نوع الزامی است"),
   organizers: yup.string().required("برگزار کنندگان الزامی است"),
   excerpt: yup.string().required("خلاصه الزامی است"),
   content: yup.string().required("محتوا الزامی است"),

@@ -1,13 +1,15 @@
 "use client";
 
-import { Modal } from "@/components/common/Modal";
 import Header from "@/components/layout/Header";
-import { Button } from "@/components/ui/button";
-import { useModal } from "@/hooks/useModal";
 import { useWorksop } from "@/hooks/useWorkshops";
 import React from "react";
-import AddWorkshopSessionForm from "../../_components/AddWorkshopSessionForm";
-import AddParticipantForm from "../../_components/AddParticipantForm";
+import { PuffLoader } from "react-spinners";
+import TransitionLink from "@/components/ui/TransitionLink";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import WorkshopMaterialsPanel from "../../_components/WorkshopMaterialsPanel";
+import WorkshopCertificatesPanel from "../../_components/WorkshopCertificatesPanel";
+import WorkshopParticipantsPanel from "../../_components/WorkshopParticipantsPanel";
+import { convertWorkshopType } from "@/lib/utils";
 
 interface Params {
   workshopId: string;
@@ -18,80 +20,84 @@ interface PageProps {
 }
 
 const WorkshopPanel = ({ params }: PageProps) => {
-  const { workshopId } = React.use<Params>(params);
+  const { workshopId } = React.use(params);
   const { data, isLoading, error, refetch } = useWorksop(workshopId);
-  const { isOpen, openModal, closeModal } = useModal();
-  const {
-    isOpen: parOpen,
-    openModal: openPar,
-    closeModal: closePar,
-  } = useModal();
-  console.log(data);
+  const workshop = data?.data;
+
   return (
     <div className="w-full h-full flex flex-col">
       <Header searchFn={() => {}} isShowSearch={false} />
-      <div className="w-full p-4 sm:p-6 md:p-8">
-        {data && (
-          <div className="w-full h-full space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-bold text-2xl">{data.data.title}</h2>
-            </div>
-            <div className="mt-12 flex-1">
-              {/* <Tabs>
-                <Tab label="جلسات" defaultTab>
-                  <Button size="sm" onClick={openModal}>
-                    افزودن جلسه
-                  </Button>
-                  <WorkshopSessionsTab
-                    sessions={data.data.sessions}
-                    workshopId={workshopId}
-                    onSessionDeleted={() => refetch()}
-                  />
-                </Tab>
-                <Tab label="شرکت کنندگان" defaultTab={false}>
-                  <Button size="sm" onClick={openPar}>
-                    افزودن شرکت کننده
-                  </Button>
-                  <WorkshopParticipantsTab
-                    onParticipnatChanged={() => refetch()}
-                    workshopId={workshopId}
-                    participants={data.data.participants}
-                  />
-                </Tab>
-              </Tabs> */}
-            </div>
+      <div className="w-full p-4 sm:p-6 md:p-8 space-y-6">
+        {isLoading && (
+          <div className="flex justify-center py-16">
+            <PuffLoader size={60} color="#3e86fa" />
           </div>
         )}
 
-        <Modal
-          isOpen={isOpen}
-          onClose={closeModal}
-          className="max-w-[700px] bg-white"
-          showCloseButton={false}
-        >
-          <AddWorkshopSessionForm
-            workshopId={workshopId}
-            onCloseModal={() => {
-              closeModal();
-              refetch();
-            }}
-          />
-        </Modal>
+        {error && (
+          <p className="text-rose-500 text-center">خطا در دریافت کارگاه</p>
+        )}
 
-        <Modal
-          isOpen={parOpen}
-          onClose={closePar}
-          className="max-w-[700px] bg-white"
-          showCloseButton={false}
-        >
-          <AddParticipantForm
-            workshopId={workshopId}
-            onCloseModal={() => {
-              closePar();
-              refetch();
-            }}
-          />
-        </Modal>
+        {workshop && (
+          <>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="font-bold text-2xl">{workshop.title}</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  نوع: {convertWorkshopType(workshop.type)} · برگزارکننده:{" "}
+                  {workshop.organizers || "—"}
+                </p>
+              </div>
+              <TransitionLink
+                href="/content-dashboard/workshops"
+                className="text-blue-600 text-sm"
+              >
+                بازگشت به لیست
+              </TransitionLink>
+            </div>
+
+            <Tabs defaultValue="participants" className="w-full">
+              <TabsList>
+                <TabsTrigger value="participants">شرکت‌کنندگان</TabsTrigger>
+                <TabsTrigger value="materials">منابع آموزشی</TabsTrigger>
+                <TabsTrigger value="certificates">گواهی‌ها</TabsTrigger>
+                <TabsTrigger value="info">اطلاعات</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="participants" className="pt-4">
+                <WorkshopParticipantsPanel workshopId={workshopId} />
+              </TabsContent>
+
+              <TabsContent value="materials" className="pt-4">
+                <WorkshopMaterialsPanel workshopId={workshopId} />
+              </TabsContent>
+
+              <TabsContent value="certificates" className="pt-4">
+                <WorkshopCertificatesPanel workshopId={workshopId} />
+              </TabsContent>
+
+              <TabsContent value="info" className="pt-4">
+                <div className="rounded-xl border bg-white p-4 dark:bg-gray-800 space-y-2 text-sm">
+                  <p>اسلاگ: {workshop.slug}</p>
+                  <p>شروع: {workshop.start_date || "—"}</p>
+                  <p>پایان: {workshop.end_date || "—"}</p>
+                  <p>روز: {workshop.week_day || "—"}</p>
+                  <p>ساعت: {workshop.time || "—"}</p>
+                  {workshop.excerpt && (
+                    <p className="text-muted-foreground pt-2">{workshop.excerpt}</p>
+                  )}
+                  <button
+                    type="button"
+                    className="text-blue-600 text-sm"
+                    onClick={() => refetch()}
+                  >
+                    تازه‌سازی
+                  </button>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
       </div>
     </div>
   );

@@ -4,14 +4,21 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   const token = req.cookies.get("token");
   const params = req.nextUrl.searchParams;
-  const date = params.get("date");
-  const page = params.get("page") || 0;
+  const page = params.get("page") || "1";
   const pageSize = params.get("pageSize") || params.get("size") || "10";
   const search = params.get("search") || "";
+  const type = params.get("type") || "";
+
+  const qs = new URLSearchParams({
+    page,
+    per_page: pageSize,
+  });
+  if (search) qs.set("search", search);
+  if (type) qs.set("type", type);
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}api/v1/workshops?page=${page}&per_page=${pageSize}&search=${search}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}api/v1/workshops?${qs}`,
       {
         method: "GET",
         headers: {

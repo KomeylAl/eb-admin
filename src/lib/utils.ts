@@ -162,6 +162,22 @@ export function convertHomeworkStatus(status: string) {
   }
 }
 
+export function convertWorkshopType(type: string) {
+  switch (type) {
+    case "general":
+      return "کارگاه عمومی";
+    case "specialized":
+    case "special":
+      return "کارگاه تخصصی";
+    case "webinar":
+      return "وبینار";
+    case "seminar":
+      return "سمینار";
+    default:
+      return type || "—";
+  }
+}
+
 export function convertCommentableType(type: string) {
   switch (type) {
     case "doctor":
