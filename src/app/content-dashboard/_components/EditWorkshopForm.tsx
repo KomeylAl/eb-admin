@@ -16,6 +16,7 @@ import RichTextEditor from "@/components/common/rich-text-editor";
 import MediaPicker from "@/components/common/MediaPicker";
 import { Combobox } from "@/components/ui/custom/Combobox";
 import { workshopTypeOptions } from "@/lib/selectOptions";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function EditWorkshopForm({
   onCloseModal,
@@ -55,6 +56,7 @@ export default function EditWorkshopForm({
       time: workshop.time,
       start_date: workshop.start_date,
       end_date: workshop.end_date,
+      registration_open: workshop.registration_open !== false,
       image: null,
       image_media_id: null,
     },
@@ -209,6 +211,25 @@ export default function EditWorkshopForm({
             }}
           />
         </div>
+      </div>
+
+      <div className="w-full">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <Controller
+            name="registration_open"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                checked={field.value !== false}
+                onCheckedChange={(checked) => field.onChange(!!checked)}
+              />
+            )}
+          />
+          ثبت‌نام فعال باشد
+        </label>
+        <p className="text-xs text-muted-foreground mt-1">
+          اگر غیرفعال باشد، حتی قبل از پایان تاریخ کارگاه هم ثبت‌نام بسته است.
+        </p>
       </div>
 
       <div className="flex justify-end gap-3 mt-5">

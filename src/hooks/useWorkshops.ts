@@ -55,6 +55,12 @@ export function useAddWorkshop(onSuccess: () => void) {
       newData.append("time", formData.time);
       newData.append("start_date", formData.start_date);
       newData.append("end_date", formData.end_date);
+      newData.append(
+        "registration_open",
+        formData.registration_open === false || formData.registration_open === "0"
+          ? "0"
+          : "1"
+      );
 
       appendMediaRef(
         newData,
@@ -100,6 +106,12 @@ export function useUpdateWorkshop(id: string, onSuccess: () => void) {
       newData.append("time", data.time);
       newData.append("start_date", data.start_date);
       newData.append("end_date", data.end_date);
+      newData.append(
+        "registration_open",
+        data.registration_open === false || data.registration_open === "0"
+          ? "0"
+          : "1"
+      );
 
       appendMediaRef(
         newData,

@@ -79,6 +79,14 @@ const WorkshopPanel = ({ params }: PageProps) => {
               <TabsContent value="info" className="pt-4">
                 <div className="rounded-xl border bg-white p-4 dark:bg-gray-800 space-y-2 text-sm">
                   <p>اسلاگ: {workshop.slug}</p>
+                  <p>
+                    ثبت‌نام:{" "}
+                    {workshop.registration_available
+                      ? "باز"
+                      : workshop.registration_open === false
+                        ? "بسته (دستی)"
+                        : "بسته"}
+                  </p>
                   <p>شروع: {workshop.start_date || "—"}</p>
                   <p>پایان: {workshop.end_date || "—"}</p>
                   <p>روز: {workshop.week_day || "—"}</p>
