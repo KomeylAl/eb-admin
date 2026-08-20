@@ -20,6 +20,7 @@ import {
   LayoutTemplate,
   Mail,
   MessageSquareText,
+  PanelsTopLeft,
   Settings,
   Stethoscope,
   Tag,
@@ -182,6 +183,12 @@ const sections: NavSection[] = [
         link: "/content-dashboard/comments",
         access: ["author"],
         icon: MessageSquareText,
+      },
+      {
+        title: "هیرو صفحه اصلی",
+        link: "/content-dashboard/hero",
+        access: ["author"],
+        icon: PanelsTopLeft,
       },
       {
         title: "درباره",
